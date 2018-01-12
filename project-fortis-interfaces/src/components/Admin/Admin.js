@@ -8,15 +8,17 @@ import TrustedSources from './TrustedSources';
 import { BlacklistEditor } from './BlacklistEditor';
 import StreamEditor from './StreamEditor';
 import AdminLocations from './AdminLocations';
+import UserRoles from './UserRoles';
 import '../../styles/Admin/Admin.css';
 
-const SETTINGS_TAB = 0;
-const WATCHLIST_TAB = 1;
-const LOCATIONS_TAB = 2;
-const CUSTOM_EVENTS_TAB = 3;
-const TRUSTED_SOURCES = 4;
-const BLACKLIST_TAB = 5;
-const STREAM_TAB = 6;
+const USERS_TAB = 0;
+const SETTINGS_TAB = 1;
+const WATCHLIST_TAB = 2;
+const LOCATIONS_TAB = 3;
+const CUSTOM_EVENTS_TAB = 4;
+const TRUSTED_SOURCES = 5;
+const BLACKLIST_TAB = 6;
+const STREAM_TAB = 7;
 
 const styles = {
   container: {
@@ -69,6 +71,7 @@ class Admin extends React.Component {
                     onSelect={this.handleTabChanged}
                     selectedIndex={this.state.index}>
                     <TabList>
+                      <Tab>Users</Tab>
                       <Tab>Site Settings</Tab>
                       <Tab>Watchlist</Tab>
                       <Tab>Geofence / Monitored places</Tab>
@@ -77,6 +80,14 @@ class Admin extends React.Component {
                       <Tab>Blacklisted Terms</Tab>
                       <Tab>Streams</Tab>
                     </TabList>
+                    <TabPanel>
+                      <h2>Users</h2>
+                      { this.props.settings && this.props.settings.properties && this.state.index === USERS_TAB &&
+                        <div className="adminTable">
+                          <UserRoles {...this.props}/>
+                        </div>
+                      }
+                    </TabPanel>
                     <TabPanel>
                       <h2>Settings</h2>
                       { this.props.settings && this.props.settings.properties && this.state.index === SETTINGS_TAB &&

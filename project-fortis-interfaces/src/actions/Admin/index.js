@@ -21,6 +21,19 @@ const _methods = {
     }));
   },
 
+  load_users() {
+    const self = this;
+    AdminServices.fetchUsers((err, response, body) => ResponseHandler(err, response, body, (error, graphqlResponse) => {
+      if (graphqlResponse && !error) {
+        self.dispatch(constants.ADMIN.LOAD_USERS, { response: graphqlResponse.users });
+      } else {
+        const action = 'failed';
+        console.error(`[${error}] occured while loading users.`);
+        self.dispatch(constants.ADMIN.LOAD_FAIL, {action});
+      }
+    }));
+  },
+
   load_blacklist() {
     const self = this;
     AdminServices.fetchBlacklists((err, response, body) => ResponseHandler(err, response, body, (error, graphqlResponse) => {

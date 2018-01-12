@@ -1,3 +1,10 @@
+export const users = `fragment UsersView on UserCollection {
+  user {
+    identifier,
+    role
+  }
+}`
+
 export const siteSettingsFragment = `fragment FortisSiteDefinitionView on SiteCollection {
   site {
     name

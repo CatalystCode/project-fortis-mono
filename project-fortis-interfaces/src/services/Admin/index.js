@@ -10,8 +10,14 @@ export const SERVICES = {
       fetchGqlData(MESSAGES_ENDPOINT, { variables, query }, callback);
     },
 
+    fetchUsers(callback) {
+    const query = `${AdminFragments.users}${AdminQueries.getUsers}`;
+    const variables = {};
+    fetchGqlData(SETTINGS_ENDPOINT, { variables, query }, callback);
+    },
+
     getDashboardSiteDefinition(translationLanguage, category, callback) {
-        const query = ` ${AdminFragments.siteSettingsFragment}
+        const query = `${AdminFragments.siteSettingsFragment}
                       ${AdminQueries.getPipelineDefinition}`;
         const variables = { translationLanguage, category };
         fetchGqlData(SETTINGS_ENDPOINT, { variables, query }, callback);
