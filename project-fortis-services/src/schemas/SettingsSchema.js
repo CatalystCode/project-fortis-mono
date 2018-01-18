@@ -15,6 +15,8 @@ module.exports = graphql.buildSchema(`
   }
 
   type Mutation {
+    addUsers(input: UserListInput!): UserCollection,
+    removeUsers(input: UserListInput!): UserCollection,
     removeKeywords(input: MutatedTerms): TermCollection
     addKeywords(input: MutatedTerms): TermCollection
     removeSite(input: EditableSiteSettings!): Site
@@ -38,6 +40,15 @@ module.exports = graphql.buildSchema(`
   }
 
   type User {
+    identifier: String!,
+    role: String!
+  }
+
+  input UserListInput {
+    users: [UserInput]!
+  }
+
+  input UserInput {
     identifier: String!,
     role: String!
   }

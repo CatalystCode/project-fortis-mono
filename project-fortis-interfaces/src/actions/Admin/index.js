@@ -7,6 +7,15 @@ function getListAfterRemove(listBeforeRemove, itemsRemoved, keyBy) {
   return differenceBy(listBeforeRemove, itemsRemoved, keyBy);
 }
 
+function addIdsToUsersForGrid(users) {
+  users.map(user => user.id = `${user.identifier}-${user.role}`);
+  return users;
+}
+
+function removeIdsFromUsers(users) {
+  return users.map( ({identifier, role}) => ({ identifier, role }) );
+}
+
 const _methods = {
   restart_pipeline() {
     const self = this;
@@ -25,11 +34,44 @@ const _methods = {
     const self = this;
     AdminServices.fetchUsers((err, response, body) => ResponseHandler(err, response, body, (error, graphqlResponse) => {
       if (graphqlResponse && !error) {
-        self.dispatch(constants.ADMIN.LOAD_USERS, { response: graphqlResponse.users });
+        let users = graphqlResponse.users.users;
+        users = addIdsToUsersForGrid(users);
+        self.dispatch(constants.ADMIN.LOAD_USERS, { response: users });
       } else {
         const action = 'failed';
         console.error(`[${error}] occured while loading users.`);
         self.dispatch(constants.ADMIN.LOAD_FAIL, {action});
+      }
+    }));
+  },
+
+  add_users(users, callback) {
+    AdminServices.addUsers(removeIdsFromUsers(users), (err, response, body) => ResponseHandler(err, response, body, (error, graphqlResponse) => {
+      if (graphqlResponse && !error) {
+        const usersBeforeSave = this.flux.stores.AdminStore.dataStore.users.filter(user => user.id === `${user.identifier}-${user.role}`);
+        const usersAdded = addIdsToUsersForGrid(graphqlResponse.addUsers.users);
+        const usersAfterSave = usersBeforeSave.concat(usersAdded);
+        this.dispatch(constants.ADMIN.LOAD_USERS, {action: 'saved', response: usersAfterSave});
+        if (callback) callback(null, usersAfterSave);
+      } else {
+        console.error(`[${error}] occured while processing user save request.`);
+        this.dispatch(constants.ADMIN.LOAD_FAIL, {action: 'failed'});
+        if (callback) callback (error, null);
+      }
+    }));
+  },
+
+  remove_users(users, callback) {
+    AdminServices.removeUsers(removeIdsFromUsers(users), (err, response, body) => ResponseHandler(err, response, body, (error, graphqlResponse) => {
+      if (graphqlResponse && !error) {
+        const usersBeforeRemove = this.flux.stores.AdminStore.dataStore.users;
+        const usersAfterRemove = getListAfterRemove(usersBeforeRemove, users, 'id');
+        this.dispatch(constants.ADMIN.LOAD_USERS, {action: 'saved', response: usersAfterRemove});
+        if (callback) callback(null, usersAfterRemove);
+      } else {
+        console.error(`[${error}] occured while processing user save request.`);
+        this.dispatch(constants.ADMIN.LOAD_FAIL, {action: 'failed'});
+        if (callback) callback(error, null);
       }
     }));
   },

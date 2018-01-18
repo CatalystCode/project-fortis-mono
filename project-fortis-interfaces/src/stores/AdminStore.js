@@ -60,7 +60,7 @@ export const AdminStore = Fluxxor.createStore({
     },
 
     handleLoadUsers(response) {
-      this.dataStore.users = response || [];
+      this.dataStore.users = response.response || [];
       this.dataStore.action = response.action || false;
       this.emit("change");
     },

@@ -1,5 +1,5 @@
 export const users = `fragment UsersView on UserCollection {
-  user {
+  users {
     identifier,
     role
   }

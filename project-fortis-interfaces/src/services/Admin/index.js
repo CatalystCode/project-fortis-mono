@@ -11,9 +11,21 @@ export const SERVICES = {
     },
 
     fetchUsers(callback) {
-    const query = `${AdminFragments.users}${AdminQueries.getUsers}`;
-    const variables = {};
-    fetchGqlData(SETTINGS_ENDPOINT, { variables, query }, callback);
+      const query = `${AdminFragments.users}${AdminQueries.getUsers}`;
+      const variables = {};
+      fetchGqlData(SETTINGS_ENDPOINT, { variables, query }, callback);
+    },
+
+    addUsers(users, callback) {
+      const query = `${AdminFragments.users}${AdminMutations.addUsers}`;
+      const variables = { input: { users } };
+      fetchGqlData(SETTINGS_ENDPOINT, { variables, query }, callback);
+    },
+
+    removeUsers(users, callback) {
+      const query = `${AdminFragments.users}${AdminMutations.removeUsers}`;
+      const variables = { input: { users } };
+      fetchGqlData(SETTINGS_ENDPOINT, { variables, query }, callback);
     },
 
     getDashboardSiteDefinition(translationLanguage, category, callback) {

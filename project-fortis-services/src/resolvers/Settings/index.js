@@ -4,6 +4,8 @@ const mutations = require('./mutations');
 const queries = require('./queries');
 
 module.exports = {
+  addUsers: mutations.addUsers,
+  removeUsers: mutations.removeUsers,
   removeSite: mutations.removeSite,
   editSite: mutations.editSite,
   modifyStreams: mutations.modifyStreams,

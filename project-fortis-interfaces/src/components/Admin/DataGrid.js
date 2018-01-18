@@ -146,7 +146,7 @@ export const DataGrid = createReactClass({
 
     const selectedRowKeys = [];
 
-    this.setState({filters: {}, localAction: STATE_ACTIONS.SAVING, modifiedRows: modifiedRows, selectedRowKeys});
+    this.setState({filters: {}, localAction: STATE_ACTIONS.MODIFIED, modifiedRows: modifiedRows, selectedRowKeys});
     this.props.handleRemove(selectedRows);
   },
   getRows() {
@@ -167,7 +167,7 @@ export const DataGrid = createReactClass({
       newRow[this.props.guidAutofillColumn] = guid();
     }
 
-    rows.push(newRow);
+    rows.unshift(newRow);
 
     this.setState({rows});
   },

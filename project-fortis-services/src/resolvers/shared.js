@@ -8,6 +8,7 @@ const NodeCache = require('node-cache');
 const uuidv4 = require('uuid/v4');
 const { createFile } = require('../clients/storage/BlobStorageClient');
 const cassandraConnector = require('../clients/cassandra/CassandraConnector');
+const { getUserFromArgs } = require('../utils/request');
 
 const BlacklistPlaces = ['colombia'];
 
@@ -15,6 +16,10 @@ const PlaceholderForSecret = 'secretHidden';
 
 const MINUTES = 60;
 const termsCache = new NodeCache( { stdTTL: 20 * MINUTES } );
+
+function isCurrentUser(args, res, user) {
+  return getUserFromArgs(args, res) === user.identifier;
+}
 
 function termsFilter(term, categoryFilter) {
   if (categoryFilter) {
@@ -247,6 +252,7 @@ function withCsvExporter(promiseFunc, exportPropertyName, container, expiryMinut
 }
 
 module.exports = {
+  isCurrentUser,
   parseLimit,
   toPipelineKey,
   toConjunctionTopics,
