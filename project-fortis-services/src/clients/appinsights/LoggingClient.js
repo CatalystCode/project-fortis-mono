@@ -35,6 +35,40 @@ function restartPipelineExtraProps() {
   });
 }
 
+function usersExtraProps() {
+  return () => ({
+    operation: 'query',
+    table: 'users',
+    success: 'true'
+  });
+}
+
+function addUsersExtraProps() {
+  return () => ({
+    operation: 'modify',
+    table: 'users',
+    success: 'true'
+  });
+}
+
+function removeUsersExtraProps() {
+  return () => ({
+    operation: 'remove',
+    table: 'users',
+    success: 'true'
+  });
+}
+
+function usersExtraMetrics() {
+  return (graphqlResult) => {
+    const totalRows = graphqlResult.users.length;
+    console.log("users total rows", totalRows);
+    return {
+      totalRows
+    };
+  };
+}
+
 function termsExtraProps() {
   return () => ({
     operation: 'query',
@@ -211,6 +245,10 @@ module.exports = {
   logNoMutationsDefined,
   logExecuteQueryError,
   restartPipelineExtraProps,
+  usersExtraProps,
+  addUsersExtraProps,
+  removeUsersExtraProps,
+  usersExtraMetrics,
   termsExtraProps,
   trustedSourcesExtraProps,
   trustedSourcesExtraMetrics,

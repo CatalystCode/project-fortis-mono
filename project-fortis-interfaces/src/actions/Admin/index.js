@@ -12,10 +12,6 @@ function addIdsToUsersForGrid(users) {
   return users;
 }
 
-function removeIdsFromUsers(users) {
-  return users.map( ({identifier, role}) => ({ identifier, role }) );
-}
-
 const _methods = {
   restart_pipeline() {
     const self = this;
@@ -45,27 +41,27 @@ const _methods = {
     }));
   },
 
-  add_users(users, callback) {
-    AdminServices.addUsers(removeIdsFromUsers(users), (err, response, body) => ResponseHandler(err, response, body, (error, graphqlResponse) => {
+  add_users(users) {
+    AdminServices.addUsers(users, (err, response, body) => ResponseHandler(err, response, body, (error, graphqlResponse) => {
       if (graphqlResponse && !error) {
         const usersBeforeSave = this.flux.stores.AdminStore.dataStore.users.filter(user => user.id === `${user.identifier}-${user.role}`);
         const usersAdded = addIdsToUsersForGrid(graphqlResponse.addUsers.users);
-        const usersAfterSave = usersBeforeSave.concat(usersAdded);
+        const usersAfterSave = usersBeforeSave.concat(usersAdded).filter(user => user.identifier !== "" || user.role !== "");
         this.dispatch(constants.ADMIN.LOAD_USERS, {action: 'saved', response: usersAfterSave});
-        if (callback) callback(null, usersAfterSave);
       } else {
         console.error(`[${error}] occured while processing user save request.`);
         this.dispatch(constants.ADMIN.LOAD_FAIL, {action: 'failed'});
-        if (callback) callback (error, null);
       }
     }));
   },
 
   remove_users(users, callback) {
-    AdminServices.removeUsers(removeIdsFromUsers(users), (err, response, body) => ResponseHandler(err, response, body, (error, graphqlResponse) => {
+    AdminServices.removeUsers(users, (err, response, body) => ResponseHandler(err, response, body, (error, graphqlResponse) => {
       if (graphqlResponse && !error) {
         const usersBeforeRemove = this.flux.stores.AdminStore.dataStore.users;
-        const usersAfterRemove = getListAfterRemove(usersBeforeRemove, users, 'id');
+        const usersRemoved = addIdsToUsersForGrid(graphqlResponse.removeUsers.users);
+        let usersAfterRemove = getListAfterRemove(usersBeforeRemove, usersRemoved, 'id')
+        usersAfterRemove = usersAfterRemove.filter(user => user.identifier !== "" || user.role !== "");;
         this.dispatch(constants.ADMIN.LOAD_USERS, {action: 'saved', response: usersAfterRemove});
         if (callback) callback(null, usersAfterRemove);
       } else {

@@ -117,6 +117,7 @@ export const DataGrid = createReactClass({
           }
     }
 
+    selectedRowKeys = [];
     this.setState({rows, localAction, selectedRowKeys, modifiedRows, filters});
   },
   lookupRowIdByKey(rowKey) {
@@ -145,7 +146,6 @@ export const DataGrid = createReactClass({
     let modifiedRows = new Set(Array.from(this.state.modifiedRows).filter(rowKey => this.state.selectedRowKeys.indexOf(rowKey) === -1));
 
     const selectedRowKeys = [];
-
     this.setState({filters: {}, localAction: STATE_ACTIONS.MODIFIED, modifiedRows: modifiedRows, selectedRowKeys});
     this.props.handleRemove(selectedRows);
   },
@@ -169,7 +169,8 @@ export const DataGrid = createReactClass({
 
     rows.unshift(newRow);
 
-    this.setState({rows});
+    const selectedRowKeys = [];
+    this.setState({rows, selectedRowKeys});
   },
   handleGridRowsUpdated(updatedRowData) {
       let rows = this.state.rows;

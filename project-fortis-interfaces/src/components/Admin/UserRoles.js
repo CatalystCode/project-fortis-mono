@@ -1,7 +1,6 @@
 import React from 'react';
 import Snackbar from 'material-ui/Snackbar';
 import groupBy from 'lodash/groupBy';
-import intersectionBy from 'lodash/intersectionBy';
 import differenceBy from 'lodash/differenceBy';
 import { DataGrid } from './DataGrid';
 import { getColumns } from './shared';
@@ -26,7 +25,6 @@ class UserRoles extends React.Component {
   }
 
   componentDidMount() {
-    console.log(this.props.authInfo);
     this.props.flux.actions.ADMIN.load_users()
   }
 
@@ -40,39 +38,14 @@ class UserRoles extends React.Component {
   }
 
   handleSave(users) {
-    this.props.flux.actions.ADMIN.add_users(users, (err, res) => {
-      if (!err) {
-        const adminRowsMissingUserRole = this.getAllAdminRowsWithoutUserRole();
-        if (adminRowsMissingUserRole.length > 0) this.alertAddUserOnAddAdmin(adminRowsMissingUserRole);
-      }
-    });
+    const adminRowsMissingUserRole = this.getAllAdminWithoutUserRole(users);
+    if (adminRowsMissingUserRole.length > 0) this.alertAddUserOnAddAdmin(adminRowsMissingUserRole);
+    this.props.flux.actions.ADMIN.add_users(this.removeIdsFromUsers(users));
   }
 
-  handleRemove(users) {
-    this.props.flux.actions.ADMIN.remove_users(users, (err, res) => {
-      if (!err) {
-        const adminRowsMissingUserRole = this.getAllAdminRowsWithoutUserRole();
-        if (adminRowsMissingUserRole.length > 0) this.alertDeleteAdminOnDeleteUser(adminRowsMissingUserRole);
-      }
-    });
-  }
-
-  getAllAdminRowsWithoutUserRole() {
-    const allUsers = this.props.users;
-    const usersGroupedByRole = groupBy(allUsers, "role");
-    const admin = usersGroupedByRole.admin;
-    const users = usersGroupedByRole.user; 
-    const adminUserPairs = intersectionBy(admin, users, 'identifier');
-    const allAdminWithoutUserRole = differenceBy(admin, adminUserPairs, 'identifier');
-    return allAdminWithoutUserRole;
-  }
-
-  alertDeleteAdminOnDeleteUser(admin) {
-    const adminIdentities = admin.map(a => a.identifier);
-    this.setState({
-      open: true,
-      message: `Would you also like to delete ${adminIdentities} with no user role?`
-    });
+  getAllAdminWithoutUserRole(users) {
+    const usersGroupedByRole = groupBy(users, 'role');
+    return differenceBy(usersGroupedByRole.admin, usersGroupedByRole.user, 'identifier');
   }
 
   alertAddUserOnAddAdmin(admin) {
@@ -80,6 +53,32 @@ class UserRoles extends React.Component {
     this.setState({
       open: true,
       message: `Added user role to ${adminIdentities}.`
+    });
+  }
+
+  removeIdsFromUsers(users) {
+    return users.map(user => ({identifier: user.identifier, role: user.role}) );
+  }
+
+  handleRemove(users) {
+    this.props.flux.actions.ADMIN.remove_users(this.removeIdsFromUsers(users), (err, res) => {
+      if (!err) {
+        const usersMissingAdminRole = this.getAllUsersWithoutAdminRole(users);
+        if (usersMissingAdminRole.length > 0) this.alertDeleteAdminOnDeleteUser(usersMissingAdminRole);
+      }
+    });
+  }
+
+  getAllUsersWithoutAdminRole(users) {
+    const usersGroupedByRole = groupBy(users, 'role');
+    return differenceBy(usersGroupedByRole.user, usersGroupedByRole.admin, 'identifier');
+  }
+
+  alertDeleteAdminOnDeleteUser(users) {
+    const adminIdentities = users.map(a => a.identifier);
+    this.setState({
+      open: true,
+      message: `Admin roles for ${adminIdentities} were deleted for any user deletions.`
     });
   }
 
@@ -95,7 +94,7 @@ class UserRoles extends React.Component {
             handleSave={this.handleSave}
             handleRemove={this.handleRemove}
             columns={this.getUserRolesColumns()}
-            rows={this.props.users} />
+            rows={this.props.users}/>
           <Snackbar
             open={this.state.open}
             message={this.state.message}

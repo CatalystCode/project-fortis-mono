@@ -155,7 +155,7 @@ function termBlacklist(args, res) { // eslint-disable-line no-unused-vars
 }
 
 module.exports = {
-  users: requiresRole(trackEvent(withRunTime(users), 'users'), 'user'),
+  users: requiresRole(trackEvent(withRunTime(users), 'users', loggingClient.usersExtraProps(), loggingClient.usersExtraMetrics()), 'user'),
   sites: requiresRole(trackEvent(withRunTime(sites), 'sites'), 'user'),
   streams: requiresRole(trackEvent(withRunTime(streams), 'streams', loggingClient.streamsExtraProps(), loggingClient.streamsExtraMetrics()), 'user'),
   siteTerms: requiresRole(trackEvent(withRunTime(terms), 'terms', loggingClient.termsExtraProps(), loggingClient.keywordsExtraMetrics()), 'user'),
