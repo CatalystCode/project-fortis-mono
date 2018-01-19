@@ -62,7 +62,6 @@ function removeUsersExtraProps() {
 function usersExtraMetrics() {
   return (graphqlResult) => {
     const totalRows = graphqlResult.users.length;
-    console.log("users total rows", totalRows);
     return {
       totalRows
     };
