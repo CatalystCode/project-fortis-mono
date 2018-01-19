@@ -11,10 +11,10 @@ import AdminLocations from './AdminLocations';
 import UserRoles from './UserRoles';
 import '../../styles/Admin/Admin.css';
 
-const USERS_TAB = 0;
-const SETTINGS_TAB = 1;
-const WATCHLIST_TAB = 2;
-const LOCATIONS_TAB = 3;
+const SETTINGS_TAB = 0;
+const WATCHLIST_TAB = 1;
+const LOCATIONS_TAB = 2;
+const USERS_TAB = 3;
 const CUSTOM_EVENTS_TAB = 4;
 const TRUSTED_SOURCES = 5;
 const BLACKLIST_TAB = 6;
@@ -71,23 +71,15 @@ class Admin extends React.Component {
                     onSelect={this.handleTabChanged}
                     selectedIndex={this.state.index}>
                     <TabList>
-                      <Tab>Users</Tab>
                       <Tab>Site Settings</Tab>
                       <Tab>Watchlist</Tab>
                       <Tab>Geofence / Monitored places</Tab>
+                      <Tab>Users</Tab>
                       <Tab>Event Import</Tab>
                       <Tab>Trusted Sources</Tab>
                       <Tab>Blacklisted Terms</Tab>
                       <Tab>Streams</Tab>
                     </TabList>
-                    <TabPanel>
-                      <h2>Users</h2>
-                      { this.props.settings && this.props.settings.properties && this.state.index === USERS_TAB &&
-                        <div className="adminTable">
-                          <UserRoles {...this.props}/>
-                        </div>
-                      }
-                    </TabPanel>
                     <TabPanel>
                       <h2>Settings</h2>
                       { this.props.settings && this.props.settings.properties && this.state.index === SETTINGS_TAB &&
@@ -111,6 +103,14 @@ class Admin extends React.Component {
                                           {...this.props}
                                           {...this.props.settings.properties} />}
                       </div>
+                    </TabPanel>
+                    <TabPanel>
+                      <h2>Users</h2>
+                      { this.props.settings && this.props.settings.properties && this.state.index === USERS_TAB &&
+                        <div className="adminTable">
+                          <UserRoles {...this.props}/>
+                        </div>
+                      }
                     </TabPanel>
                     <TabPanel>
                       <h2>Event Import</h2>

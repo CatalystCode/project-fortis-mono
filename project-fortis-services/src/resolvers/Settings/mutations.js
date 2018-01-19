@@ -1,14 +1,20 @@
 'use strict';
+
 const groupBy = require('lodash/groupBy');
 const differenceBy = require('lodash/differenceBy');
 const Promise = require('promise');
 const uuid = require('uuid/v4');
 const cassandraConnector = require('../../clients/cassandra/CassandraConnector');
 const streamingController = require('../../clients/streaming/StreamingController');
-const { PlaceholderForSecret, getSiteDefinition, withRunTime, limitForInClause, isCurrentUser } = require('../shared');
+const { PlaceholderForSecret, getSiteDefinition, withRunTime, limitForInClause } = require('../shared');
 const { trackEvent, trackException } = require('../../clients/appinsights/AppInsightsClient');
 const loggingClient = require('../../clients/appinsights/LoggingClient');
 const { requiresRole } = require('../../auth');
+const { getUserFromArgs } = require('../../utils/request');
+
+function isCurrentUser(args, res, user) {
+  return getUserFromArgs(args, res) === user.identifier;
+}
 
 function addUsers(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
@@ -63,7 +69,7 @@ function removeUsers(args, res) { // eslint-disable-line no-unused-vars
 
     const usersWithoutAdminRole = getAllUsersWithoutAdminRole(users);
     const missingAdminRoles = usersWithoutAdminRole.map(({identifier}) => ({identifier, role: 'admin'}));
-    const usersToRemove = users.concat(missingAdminRoles);    
+    const usersToRemove = removeCurrentUser(users.concat(missingAdminRoles), args, res);   
     const mutations = [];
     usersToRemove.forEach(user => {
       if (!isCurrentUser(args, res, user)) {
@@ -89,6 +95,10 @@ function removeUsers(args, res) { // eslint-disable-line no-unused-vars
         reject(error);
       });
   });
+}
+
+function removeCurrentUser(users, args, res) {
+  return users.filter(user => !isCurrentUser(args, res, user));
 }
 
 function getAllUsersWithoutAdminRole(users) {

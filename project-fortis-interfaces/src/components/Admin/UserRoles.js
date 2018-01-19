@@ -18,17 +18,13 @@ class UserRoles extends React.Component {
       open: false,
       message: ''
     };
-
-    this.getUserRolesColumns = this.getUserRolesColumns.bind(this);
-    this.handleSave = this.handleSave.bind(this);
-    this.handleRemove = this.handleRemove.bind(this);
   }
 
   componentDidMount() {
     this.props.flux.actions.ADMIN.load_users()
   }
 
-  getUserRolesColumns() {
+  getUserRolesColumns = () => {
     const columnValues = [
       {editable: true, filterable: true, sortable: true, key: "identifier", name: "Identity"},
       {editable: false, filterable: true, sortable: true, key: "role", name: "Role", editor: <DropDownEditor options={roles}/>, formatter: <DropDownFormatter options={roles}/>}
@@ -37,18 +33,18 @@ class UserRoles extends React.Component {
     return getColumns(columnValues);
   }
 
-  handleSave(users) {
+  handleSave = users => {
     const adminRowsMissingUserRole = this.getAllAdminWithoutUserRole(users);
     if (adminRowsMissingUserRole.length > 0) this.alertAddUserOnAddAdmin(adminRowsMissingUserRole);
     this.props.flux.actions.ADMIN.add_users(this.removeIdsFromUsers(users));
   }
 
-  getAllAdminWithoutUserRole(users) {
+  getAllAdminWithoutUserRole = users => {
     const usersGroupedByRole = groupBy(users, 'role');
     return differenceBy(usersGroupedByRole.admin, usersGroupedByRole.user, 'identifier');
   }
 
-  alertAddUserOnAddAdmin(admin) {
+  alertAddUserOnAddAdmin = admin => {
     const adminIdentities = admin.map(a => a.identifier);
     this.setState({
       open: true,
@@ -56,11 +52,11 @@ class UserRoles extends React.Component {
     });
   }
 
-  removeIdsFromUsers(users) {
+  removeIdsFromUsers = users => {
     return users.map(user => ({identifier: user.identifier, role: user.role}) );
   }
 
-  handleRemove(users) {
+  handleRemove = users => {
     this.props.flux.actions.ADMIN.remove_users(this.removeIdsFromUsers(users), (err, res) => {
       if (!err) {
         const usersMissingAdminRole = this.getAllUsersWithoutAdminRole(users);
@@ -69,12 +65,12 @@ class UserRoles extends React.Component {
     });
   }
 
-  getAllUsersWithoutAdminRole(users) {
+  getAllUsersWithoutAdminRole = users => {
     const usersGroupedByRole = groupBy(users, 'role');
     return differenceBy(usersGroupedByRole.user, usersGroupedByRole.admin, 'identifier');
   }
 
-  alertDeleteAdminOnDeleteUser(users) {
+  alertDeleteAdminOnDeleteUser = users => {
     const adminIdentities = users.map(a => a.identifier);
     this.setState({
       open: true,
@@ -84,7 +80,8 @@ class UserRoles extends React.Component {
 
   render() {
     return (
-      this.getUserRolesColumns().length > 0 ?
+      this.getUserRolesColumns().length <= 0 ?
+        <div /> :
         <div>
           <DataGrid
             rowHeight={40}
@@ -102,7 +99,6 @@ class UserRoles extends React.Component {
             onRequestClose={this.handleRequestClose}
           />
         </div>
-        : <div />
     );
   }
 }

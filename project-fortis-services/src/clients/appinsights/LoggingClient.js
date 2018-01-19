@@ -61,7 +61,7 @@ function removeUsersExtraProps() {
 
 function usersExtraMetrics() {
   return (graphqlResult) => {
-    const totalRows = graphqlResult.users.length;
+    const totalRows = graphqlResult && graphqlResult.users && graphqlResult.users.length;
     return {
       totalRows
     };
@@ -86,7 +86,7 @@ function trustedSourcesExtraProps() {
 
 function trustedSourcesExtraMetrics() {
   return (graphqlResult) => {
-    const totalRows = graphqlResult.sources.length;
+    const totalRows = graphqlResult && graphqlResult.sources && graphqlResult.sources.length;
     return {
       totalRows
     };
@@ -133,7 +133,7 @@ function modifyStreamsExtraProps() {
 
 function streamsExtraMetrics() {
   return (graphqlResult) => {
-    const totalRows = graphqlResult.streams.length;
+    const totalRows = graphqlResult && graphqlResult.streams && graphqlResult.streams.length;
     return {
       totalRows
     };
@@ -174,7 +174,7 @@ function removeKeywordsExtraProps() {
 
 function keywordsExtraMetrics() {
   return (graphqlResult) => {
-    const totalRows = graphqlResult.edges.length;
+    const totalRows = graphqlResult && graphqlResult.edges && graphqlResult.edges.length;
     return {
       totalRows
     };
