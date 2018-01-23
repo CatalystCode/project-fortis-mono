@@ -55,6 +55,11 @@ export default class Dashboard extends React.Component {
     const watchlistResizedHeight = 0;
     this.setState({ newsfeedResizedHeight, watchlistResizedHeight, isHeatmapFullScreen: !this.state.isHeatmapFullScreen });
   }
+  clickMapReset() {
+    const newsfeedResizedHeight = 0;
+    const watchlistResizedHeight = 0;
+    this.setState({ newsfeedResizedHeight, watchlistResizedHeight, isHeatmapFullScreen: !this.state.isHeatmapFullScreen });
+  }
 
   filterLiterals() {
     const { dataSource, zoomLevel, enabledStreams, selectedplace, flux, bbox, timespanType, termFilters, maintopic, externalsourceid, datetimeSelection, fromDate, toDate, language } = this.props;
@@ -240,6 +245,14 @@ export default class Dashboard extends React.Component {
               ]}
               tooltipPosition="top-center"
               fetchCsvs={this.refreshDashboardWithCsv}
+            />
+          </div>
+          <div className="dashboard-action">
+            <MapBoundingReset
+              tooltipOn="Click to reset map boundaries"
+              tooltipOff="Click to reset map boundaries"
+              tooltipPosition="top-center"
+              onClick={this.clickMapReset}
             />
           </div>
           <div className="dashboard-action">
