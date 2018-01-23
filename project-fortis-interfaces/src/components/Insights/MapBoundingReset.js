@@ -1,7 +1,6 @@
 import React from 'react';
 import IconButton from 'material-ui/IconButton/IconButton';
-import NavigationFullscreen from 'material-ui/svg-icons/navigation/fullscreen';
-import NavigationFullscreenExit from 'material-ui/svg-icons/navigation/fullscreen-exit';
+import Map from 'material-ui/svg-icons/maps/map';
 import { fullWhite } from 'material-ui/styles/colors';
 
 export default class MapBoundingReset extends React.Component {
@@ -27,7 +26,7 @@ export default class MapBoundingReset extends React.Component {
     return (
       <div>
         <IconButton tooltip={expanded ? tooltipOff : tooltipOn} onClick={this.onClick} tooltipPosition={tooltipPosition}>
-          {expanded ? <NavigationFullscreenExit color={fullWhite} /> : <NavigationFullscreen color={fullWhite} />}
+          {expanded ? <Map color={fullWhite} /> : <Map color={fullWhite} />}
         </IconButton>
       </div>
     );
