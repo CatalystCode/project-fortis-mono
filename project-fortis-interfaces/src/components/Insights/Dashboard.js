@@ -176,9 +176,9 @@ export default class Dashboard extends React.Component {
 
   refreshDashboard = (includeCsv, replaceBbox) => {
     const { dataSource, timespanType, termFilters, datetimeSelection, zoomLevel, maintopic, bbox, fromDate, toDate, externalsourceid, selectedplace } = this.filterLiterals();
-    if (replaceBbox === null) {
-      replaceBbox = bbox;
-    }
+
+    replaceBbox = replaceBbox || bbox;
+    
     this.props.flux.actions.DASHBOARD.reloadVisualizationState(fromDate, toDate, datetimeSelection, timespanType, dataSource, maintopic, replaceBbox, zoomLevel, Array.from(termFilters), externalsourceid, includeCsv, selectedplace);
   }
 
