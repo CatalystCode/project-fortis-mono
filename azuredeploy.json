@@ -181,6 +181,24 @@
                 "description": "The Service Principal Client Secret."
             },
             "type": "securestring"
+        },
+        "ingressHostname": {
+            "metadata": {
+                "description": "The hostname of the external ingress system."
+            },
+            "type": "string"
+        },
+        "tlsCertificate": {
+            "metadata": {
+                "description": "The certificate to use for TLS.  Must be base64 encoded."
+            },
+            "type": "string"
+        },
+        "tlsPrivateKey": {
+            "metadata": {
+                "description": "The private key for use with TLS.  Must be base64 encoded."
+            },
+            "type": "string"
         }
     },
     "variables": {

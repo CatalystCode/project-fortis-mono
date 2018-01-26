@@ -67,6 +67,15 @@
         },
         "servicePrincipalAppKey": {
             "value": "CHANGE ME"
-        }
+        },
+        "ingressHostname": {
+            "value": "CHANGE ME -- OPTIONAL"
+        },
+        "tlsCertificate": {
+            "value": "CHANGE ME -- OPTIONAL"
+        },
+        "tlsPrivateKey": {
+            "value": "CHANGE ME -- OPTIONAL"
+        }            
     }
 }
