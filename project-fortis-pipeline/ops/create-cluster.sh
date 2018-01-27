@@ -22,6 +22,9 @@ readonly cogspeechsvctoken="${19}"
 readonly cogtextsvctoken="${20}"
 readonly translationsvctoken="${21}"
 readonly fortis_site_clone_url="${22}"
+readonly tls_hostname="${24}"
+readonly tls_certificate_b64="${25}"
+readonly tls_key_b64="${26}"
 
 if [ -z "${aad_client}" ]; then readonly fortis_interface_protocol="http"; else readonly fortis_interface_protocol="https"; fi
 readonly feature_service_host="http://fortis-features.eastus.cloudapp.azure.com"
@@ -73,7 +76,10 @@ echo "Finished. Now setting up fortis graphql service in kubernetes."
   "${cogspeechsvctoken}" \
   "${cogtextsvctoken}" \
   "${translationsvctoken}" \
-  "${fortis_site_clone_url}"
+  "${fortis_site_clone_url}" \
+  "${tls_hostname}" \
+  "${tls_certificate_b64}" \
+  "${tls_key_b64}"
 while :; do
   fortis_service_ip="$(kubectl get svc project-fortis-services-lb -o jsonpath='{..ip}')"
   if [ -n "${fortis_service_ip}" ]; then break; else echo "Waiting for project-fortis-services IP"; sleep 5s; fi

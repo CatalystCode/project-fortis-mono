@@ -41,6 +41,10 @@ Arguments
   --cogspeechsvctoken|-csst          [Optional] : Cognitive Services Speech access token
   --translationsvctoken|-tst         [Optional] : Cognitive Services Translation access token
   --fortis_site_clone_url|-fcu       [Optional] : URL to exported Fortis site to clone
+  --endpoint_protection|-ep          [Optional] : What version of endpoint protection to use
+  --ingress_hostname|-ih             [Optional] : Hostname for TLS ingress
+  --tls_certificate|-tc              [Optional] : Certificate (in base64) for TLS
+  --tls_key|-tk                      [Optional] : Private key (in base64) for TLS
 EOF
 }
 
@@ -48,6 +52,18 @@ throw_if_empty() {
   local name="$1"
   local value="$2"
   if [ -z "${value}" ]; then echo "Parameter '${name}' cannot be empty." 1>&2; print_usage; exit -1; fi
+}
+
+throw_if_tls_certificate_info_not_complete() {
+  local hostname="$1"
+  local certificate="$2"
+  local key="$3"
+  if [[ ! -z "$hostname" ]] && [[ ! -z "$certificate" ]] && [[ ! -z "$key" ]]; then
+    return
+  fi
+  echo  "endpoint_protection with value 'tls_provide_certificate' requires either all fields 'ingress_hostname', 'tls_certificate', 'tls_key' either must be empty or fully filled out." 1>&2
+  print_usage
+  exit -1
 }
 
 while [[ $# -gt 0 ]]; do
@@ -170,6 +186,22 @@ while [[ $# -gt 0 ]]; do
       fortis_site_clone_url="$1"
       shift
       ;;
+    --endpoint_protection|-ep)
+      endpoint_protection="$1"
+      shift
+      ;;
+    --ingress_hostname|-ih)
+      ingress_hostname="$1"
+      shift
+      ;;
+    --tls_certificate|-tc)
+      tls_certificate="$1"
+      shift
+      ;;
+    --tls_key|-tk)      
+      tls_key="$1"
+      shift
+      ;;
     *)
       echo "ERROR: Unknown argument '${key}' to script '$0'" 1>&2
       exit -1
@@ -261,6 +293,9 @@ throw_if_empty --eh_conn_str "${eh_conn_str}"
 throw_if_empty --sb_conn_str "${sb_conn_str}"
 throw_if_empty --agent_vm_size "${agent_vm_size}"
 throw_if_empty --mapbox_access_token "${mapbox_access_token}"
+if [ "${endpoint_protection}" = "tls_provide_certificate" ] then
+  throw_if_tls_certificate_info_not_complete "${ingress_hostname}" "${tls_certificate}" "${tls_key}"
+fi
 
 readonly kube_config_dest_file="/home/${user_name}/.kube/config"
 
@@ -339,7 +374,10 @@ echo "Finished. Setting up cluster"
   "${cogspeechsvctoken}" \
   "${cogtextsvctoken}" \
   "${translationsvctoken}" \
-  "${fortis_site_clone_url}"
+  "${fortis_site_clone_url}" \
+  "${ingress_hostname}" \
+  "${tls_certificate}" \
+  "${tls_key}"
 
 # shellcheck disable=SC2181
 if [ $? -ne 0 ]; then
