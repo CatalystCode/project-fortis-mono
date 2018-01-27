@@ -68,7 +68,7 @@
         "servicePrincipalAppKey": {
             "value": "CHANGE ME"
         },
-        "endpoint_protection": {
+        "endpointProtection": {
             "value": "none"
         },
         "ingressHostname": {
