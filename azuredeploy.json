@@ -181,6 +181,35 @@
                 "description": "The Service Principal Client Secret."
             },
             "type": "securestring"
+        },
+        "endpointProtection": {
+            "type": "string",
+            "allowedValues": [
+                "none",
+                "tls_provide_certificate",
+                "tls_lets_encrypt"
+            ],
+            "metadata": {
+                "description": "Endpoint security."
+            }
+        },
+        "ingressHostname": {
+            "metadata": {
+                "description": "The hostname of the external ingress system."
+            },
+            "type": "string"
+        },
+        "tlsCertificate": {
+            "metadata": {
+                "description": "The certificate to use for TLS.  Must be base64 encoded."
+            },
+            "type": "string"
+        },
+        "tlsPrivateKey": {
+            "metadata": {
+                "description": "The private key for use with TLS.  Must be base64 encoded."
+            },
+            "type": "string"
         }
     },
     "variables": {
@@ -216,7 +245,7 @@
         "virtualNetworkName": "FortisVNet",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
         "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
-        "githubClonePath": "https://github.com/CatalystCode/project-fortis.git",
+        "githubClonePath": "https://github.com/jmspring/project-fortis.git",
         "sbNamespace": "[concat('sbns', parameters('siteName'))]",
         "sbQueueNameConfiguration": "configuration",
         "sbQueueNameCommand": "command",
@@ -568,9 +597,9 @@
                 "autoUpgradeMinorVersion": true,
                 "settings": {
                     "fileUris": [
-                        "https://raw.githubusercontent.com/CatalystCode/project-fortis/master/project-fortis-pipeline/fortis-deploy.sh"
+                        "https://raw.githubusercontent.com/jmspring/project-fortis/tls-with-cert/project-fortis-pipeline/fortis-deploy.sh"
                     ],
-                    "commandToExecute": "[concat('./fortis-deploy.sh', ' -fcu \"', parameters('fortisSiteCloneUrl'), '\" -ad \"', parameters('activeDirectoryClientId'), '\" -fa \"', parameters('fortisAdmins'), '\" -fu \"', parameters('fortisUsers'), '\" -lo \"', parameters('siteLocation'), '\" -ak \"', parameters('servicePrincipalAppKey'), '\" -si \"', subscription().subscriptionId, '\" -ti \"', subscription().tenantId, '\" -sn \"', parameters('siteName'), '\" -un \"', parameters('adminUsername'), '\" -aii \"', reference(resourceId('Microsoft.Insights/components', variables('applicationInsightServiceName')), '2014-04-01').InstrumentationKey,'\" -rg \"', resourceGroup().name, '\" -mf \"', reference(resourceId('Microsoft.ContainerService/containerServices', variables('kubernetesName'))).masterProfile.fqdn, '\" -san \"', variables('storageAccountName'), '\" -sak \"', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2016-01-01').keys[0].value,'\" -sty \"', parameters('siteType'), '\" -ai \"', parameters('servicePrincipalAppId'), '\" -sw \"', parameters('sparkWorkers'), '\" -cn \"', parameters('cassandraNodes'), '\" -pf \"', parameters('dnsNamePrefix'), '\" -ec \"', listKeys(variables('eventhubResource'), variables('ehVersion')).primaryConnectionString, '\" -sb \"', listkeys(variables('sbAuthRuleResourceId'), variables('sbVersion')).primaryConnectionString, '\" -mat \"', parameters('mapboxAccessToken'), '\" -csst \"', parameters('cognitiveServicesBingSpeechToken'), '\" -tst \"', parameters('cognitiveServicesTextTranslationToken'), '\" -ctst \"', parameters('cognitiveServicesTextAnalyticsToken'), '\" -cvst \"', parameters('cognitiveServicesComputerVisionToken'), '\" -gc \"', variables('githubClonePath'), '\" -avms \"', parameters('agentVMSize'), '\"')]"
+                    "commandToExecute": "[concat('./fortis-deploy.sh', ' -fcu \"', parameters('fortisSiteCloneUrl'), '\" -ad \"', parameters('activeDirectoryClientId'), '\" -fa \"', parameters('fortisAdmins'), '\" -fu \"', parameters('fortisUsers'), '\" -lo \"', parameters('siteLocation'), '\" -ak \"', parameters('servicePrincipalAppKey'), '\" -si \"', subscription().subscriptionId, '\" -ti \"', subscription().tenantId, '\" -sn \"', parameters('siteName'), '\" -un \"', parameters('adminUsername'), '\" -aii \"', reference(resourceId('Microsoft.Insights/components', variables('applicationInsightServiceName')), '2014-04-01').InstrumentationKey,'\" -rg \"', resourceGroup().name, '\" -mf \"', reference(resourceId('Microsoft.ContainerService/containerServices', variables('kubernetesName'))).masterProfile.fqdn, '\" -san \"', variables('storageAccountName'), '\" -sak \"', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2016-01-01').keys[0].value,'\" -sty \"', parameters('siteType'), '\" -ai \"', parameters('servicePrincipalAppId'), '\" -sw \"', parameters('sparkWorkers'), '\" -cn \"', parameters('cassandraNodes'), '\" -pf \"', parameters('dnsNamePrefix'), '\" -ec \"', listKeys(variables('eventhubResource'), variables('ehVersion')).primaryConnectionString, '\" -sb \"', listkeys(variables('sbAuthRuleResourceId'), variables('sbVersion')).primaryConnectionString, '\" -mat \"', parameters('mapboxAccessToken'), '\" -csst \"', parameters('cognitiveServicesBingSpeechToken'), '\" -tst \"', parameters('cognitiveServicesTextTranslationToken'), '\" -ctst \"', parameters('cognitiveServicesTextAnalyticsToken'), '\" -cvst \"', parameters('cognitiveServicesComputerVisionToken'), '\" -gc \"', variables('githubClonePath'), '\" -avms \"', parameters('agentVMSize'), '\" -ep \"', parameters('endpointProtection'), '\" -ih \"', parameters('ingressHostname'), '\" -tc \"', parameters('tlsCertificate'), '\" -tk \"', parameters('tlsPrivateKey'), '\"')]"
                 }
             }
         }
