@@ -83,10 +83,18 @@ echo "Finished. Now setting up fortis graphql service in kubernetes."
   "${tls_certificate_b64}" \
   "${tls_key_b64}"
 while :; do
-  fortis_service_ip="$(kubectl get svc project-fortis-services-lb -o jsonpath='{..ip}')"
+  if [ "${endpoint_protection}" = "none" ]; then
+  	fortis_service_ip="$(kubectl get svc project-fortis-services-lb -o jsonpath='{..ip}')"
+  elif [ "$endpoint_protection" = "tls_provide_certificate" ]; then
+  	fortis_service_ip="$(kubectl get svc/nginx-ingress-controller --namespace=nginx-ingress -o jsonpath='{..ip}')"
+  fi
   if [ -n "${fortis_service_ip}" ]; then break; else echo "Waiting for project-fortis-services IP"; sleep 5s; fi
 done
-readonly graphql_service_host="http://${fortis_service_ip}"
+if [ "${endpoint_protection}" = "none" ]; then
+	readonly graphql_service_host="http://${fortis_service_ip}"
+else
+	readonly graphql_service_host="https://${fortis_service_ip}"
+fi
 
 echo "Finished. Now setting up fortis react frontend."
 ./install-fortis-interfaces.sh \
