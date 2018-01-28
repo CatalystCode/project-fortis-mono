@@ -129,12 +129,15 @@ status:
 EOF
 kubectl create -f "${deployment_yaml}","${service_yaml}"
 
-if [ "$endpoint_protection" = "none" ]; then
+echo "----"
+echo "${endpoint_protection}"
+echo "----"
+if [ "${endpoint_protection}" = "none" ]; then
   # request a public ip for the service
   kubectl expose deployment project-fortis-services \
     --type "LoadBalancer" \
     --name "project-fortis-services-lb"
-elif [ "$endpoint_protection" = "tls_provide_certificate" ]; then
+elif [ "${endpoint_protection}" = "tls_provide_certificate" ]; then
   # setup nginx ingress controller
   helm install stable/nginx-ingress --name nginx-ingress --namespace nginx-ingress --set controller.replicaCount=3
   cat > "${ingress_yaml}" << EOF
