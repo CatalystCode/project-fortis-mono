@@ -168,7 +168,7 @@ docker-compose exec project_fortis_services /app/cqlsh
 
 Hit the deploy to Azure button below:
 
-[![Deploy to Azure](http://azuredeploy.net/deploybutton.svg)](https://deploy.azure.com/?repository=https://github.com/jmspring/project-fortis/tree/tls-with-cert?ptmpl=azuredeploy.parameters.json)
+[![Deploy to Azure](http://azuredeploy.net/deploybutton.svg)](https://deploy.azure.com/?repository=https://github.com/jmspring/project-fortis/tree/master?ptmpl=azuredeploy.parameters.json)
 
 Fill in the wizard that comes up:
 
