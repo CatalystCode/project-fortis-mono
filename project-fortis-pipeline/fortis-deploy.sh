@@ -375,6 +375,7 @@ echo "Finished. Setting up cluster"
   "${cogtextsvctoken}" \
   "${translationsvctoken}" \
   "${fortis_site_clone_url}" \
+  "${endpoint_protection}" \
   "${ingress_hostname}" \
   "${tls_certificate}" \
   "${tls_key}"
