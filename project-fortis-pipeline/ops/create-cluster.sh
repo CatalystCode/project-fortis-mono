@@ -22,6 +22,7 @@ readonly cogspeechsvctoken="${19}"
 readonly cogtextsvctoken="${20}"
 readonly translationsvctoken="${21}"
 readonly fortis_site_clone_url="${22}"
+readonly endpoint_protection="${23}"
 readonly tls_hostname="${24}"
 readonly tls_certificate_b64="${25}"
 readonly tls_key_b64="${26}"
@@ -77,6 +78,7 @@ echo "Finished. Now setting up fortis graphql service in kubernetes."
   "${cogtextsvctoken}" \
   "${translationsvctoken}" \
   "${fortis_site_clone_url}" \
+  "${endpoint_protection}" \
   "${tls_hostname}" \
   "${tls_certificate_b64}" \
   "${tls_key_b64}"
