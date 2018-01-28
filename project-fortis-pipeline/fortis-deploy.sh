@@ -355,7 +355,7 @@ echo "----------"
 echo "1 - ${endpoint_protection}"
 echo "2 - ${ingress_hostname}"
 echo "3 - ${tls_certificate}"
-echo "4 - ${tls_key}""
+echo "4 - ${tls_key}"
 echo "----------"
 echo "Finished. Setting up cluster"
 ./create-cluster.sh \
