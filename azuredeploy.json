@@ -13,7 +13,7 @@
         		"description": "The release or branch to use for deploying Fortis."
         	},
         	"type": "string"
-        }
+        },
         "siteName": {
             "type": "string",
             "metadata": {
