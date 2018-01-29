@@ -46,7 +46,7 @@ Arguments
   --tls_certificate|-tc              [Optional] : Certificate (in base64) for TLS
   --tls_key|-tk                      [Optional] : Private key (in base64) for TLS
   --lets_encrypt_email|-lee			 [Optional] : Email to register with Let's Encrypt
-  --lets_encrypt_api_endpoint|leae   [Optional] : Let's Encrypt API endpoint
+  --lets_encrypt_api_endpoint|-leae  [Optional] : Let's Encrypt API endpoint
 EOF
 }
 
@@ -72,7 +72,7 @@ throw_if_tls_lets_encrypt_info_not_complete() {
   local hostname="$1"
   local email="$2"
   local endpoint="$3"
-  if [[ ! -z "${hostname}" ]] && [[ ! -z "${certificate}" ]] && [[ ! -z "${endpoint}" ]]; then
+  if [[ ! -z "${hostname}" ]] && [[ ! -z "${email}" ]] && [[ ! -z "${endpoint}" ]]; then
     return
   fi
   echo  "endpoint_protection with value 'tls_lets_encrypt' requires fields 'ingress_hostname', 'lets_encrypt_email', 'lets_encrypt_api_endpoint' be fully filled out." 1>&2
