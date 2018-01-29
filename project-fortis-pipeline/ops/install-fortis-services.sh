@@ -27,6 +27,8 @@ readonly endpoint_protection="${24}"
 readonly tls_hostname="${25}"
 readonly tls_certificate_b64="${26}"
 readonly tls_key_b64="${27}"
+readonly lets_encrypt_email="${28}"
+readonly lets_encrypt_api_endpoint="${29}"
 
 # setup
 mkdir -p "/tmp/fortis-services"
@@ -170,6 +172,38 @@ data:
 type: kubernetes.io/tls
 EOF
   kubectl create -f "${ingress_secret_yaml}","${ingress_yaml}"
+else
+  # setup kube-lego
+  helm install --name fortis-kube-lego \
+  	--set config.LEGO_EMAIL="${lets_encrypt_email}" \
+  	--set config.LEGO_URL="${lets_encrypt_api_endpoint}" \
+  	stable/kube-lego
+  
+  # setup nginx ingress controller
+  helm install stable/nginx-ingress --name nginx-ingress --namespace nginx-ingress --set controller.replicaCount=3
+  cat > "${ingress_yaml}" << EOF
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    kubernetes.io/tls-acme: 'true'
+  name: project-fortis-services-ingress
+spec:
+  rules:
+    - host: ${tls_hostname}
+      http:
+        paths:
+          - backend:
+              serviceName: project-fortis-services
+              servicePort: 80
+            path: /
+  tls:
+    - hosts:
+        - ${tls_hostname}
+      secretName: project-fortis-services-nginx-tls-secret 
+EOF
+    kubectl create -f "${ingress_yaml}"
 fi
 
 

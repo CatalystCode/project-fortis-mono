@@ -45,6 +45,8 @@ Arguments
   --ingress_hostname|-ih             [Optional] : Hostname for TLS ingress
   --tls_certificate|-tc              [Optional] : Certificate (in base64) for TLS
   --tls_key|-tk                      [Optional] : Private key (in base64) for TLS
+  --lets_encrypt_email|-lee			 [Optional] : Email to register with Let's Encrypt
+  --lets_encrypt_api_endpoint|leae   [Optional] : Let's Encrypt API endpoint
 EOF
 }
 
@@ -61,9 +63,21 @@ throw_if_tls_certificate_info_not_complete() {
   if [[ ! -z "$hostname" ]] && [[ ! -z "$certificate" ]] && [[ ! -z "$key" ]]; then
     return
   fi
-  echo  "endpoint_protection with value 'tls_provide_certificate' requires either all fields 'ingress_hostname', 'tls_certificate', 'tls_key' either must be empty or fully filled out." 1>&2
+  echo  "endpoint_protection with value 'tls_provide_certificate' requires fields 'ingress_hostname', 'tls_certificate', 'tls_key' be fully filled out." 1>&2
   print_usage
   exit -1
+}
+
+throw_if_tls_lets_encrypt_info_not_complete() {
+  local hostname="$1"
+  local email="$2"
+  local endpoint="$3"
+  if [[ ! -z "${hostname}" ]] && [[ ! -z "${certificate}" ]] && [[ ! -z "${endpoint}" ]]; then
+    return
+  fi
+  echo  "endpoint_protection with value 'tls_lets_encrypt' requires fields 'ingress_hostname', 'lets_encrypt_email', 'lets_encrypt_api_endpoint' be fully filled out." 1>&2
+  print_usage
+  exit -1  
 }
 
 while [[ $# -gt 0 ]]; do
@@ -206,6 +220,14 @@ while [[ $# -gt 0 ]]; do
       tls_key="$1"
       shift
       ;;
+    --lets_encrypt_email|-lee)
+      lets_encrypt_email="$1"
+      shift
+      ;;
+    --lets_encrypt_api_endpoint|-leae)
+      lets_encrypt_api_endpoint="$1"
+      shift
+      ;;
     *)
       echo "ERROR: Unknown argument '${key}' to script '$0'" 1>&2
       exit -1
@@ -299,12 +321,10 @@ throw_if_empty --sb_conn_str "${sb_conn_str}"
 throw_if_empty --agent_vm_size "${agent_vm_size}"
 throw_if_empty --mapbox_access_token "${mapbox_access_token}"
 
-# only "none" and "tls_provide_certificate" supported currently
-if [ "${endpoint_protection}" == "tls_lets_encrypt" ]; then
-  echo "'tls_lets_encrypt' not yet supported." 1>&2; print_usage; exit -1
-fi
 if [ "${endpoint_protection}" == "tls_provide_certificate" ]; then
   throw_if_tls_certificate_info_not_complete "${ingress_hostname}" "${tls_certificate}" "${tls_key}"
+elif [ "${endpoint_protection}" == "tls_lets_encrypt" ]l then
+  throw_if_tls_lets_encrypt_info_not_complete "${ingress_hostname}" "${lets_encrypt_email}" "${lets_encrypt_api_endpoint}"
 fi
 
 readonly kube_config_dest_file="/home/${user_name}/.kube/config"
@@ -392,7 +412,9 @@ echo "Finished. Setting up cluster"
   "${endpoint_protection}" \
   "${ingress_hostname}" \
   "${tls_certificate}" \
-  "${tls_key}"
+  "${tls_key}" \
+  "${lets_encrypt_email}" \
+  "${lets_encrypt_api_endpoint}"
 
 # shellcheck disable=SC2181
 if [ $? -ne 0 ]; then

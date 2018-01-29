@@ -85,6 +85,12 @@
         },
         "tlsPrivateKey": {
             "value": ""
+        },
+        "letsEncryptEmail": {
+        	"value": ""
+        },
+        "letsEncryptAPIEndpoint": {
+        	"value": "https://acme-staging.api.letsencrypt.org/directory"
         }
     }
 }
