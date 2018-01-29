@@ -129,9 +129,6 @@ status:
 EOF
 kubectl create -f "${deployment_yaml}","${service_yaml}"
 
-echo "----"
-echo "${endpoint_protection}"
-echo "----"
 if [ "${endpoint_protection}" = "none" ]; then
   # request a public ip for the service
   kubectl expose deployment project-fortis-services \

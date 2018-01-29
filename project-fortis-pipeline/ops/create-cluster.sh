@@ -152,7 +152,7 @@ else
   echo "Got service IP: ${fortis_service_verification_ip}"
   project_fortis_services_verification_endpoint="http://${fortis_service_verification_ip}"
   echo "Endpoint: ${project_fortis_services_verification_endpoint}"
-  ./verify-deplooyment.sh \
+  ./verify-deployment.sh \
   	"${project_fortis_services_verification_endpoint}"
 fi
     
