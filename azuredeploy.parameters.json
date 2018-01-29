@@ -5,7 +5,7 @@
         "githubProjectParent": {
             "value": "CatalystCode"
         },
-        "githubRelease": {
+        "githubProjectRelease": {
 			"value": "master"
         },
         "siteName": {
