@@ -351,12 +351,6 @@ cp -r /tmp/fortis-project/project-fortis-pipeline .
 cd project-fortis-pipeline/ops/ || exit -2
 chmod 752 create-cluster.sh
 
-echo "----------"
-echo "1 - ${endpoint_protection}"
-echo "2 - ${ingress_hostname}"
-echo "3 - ${tls_certificate}"
-echo "4 - ${tls_key}"
-echo "----------"
 echo "Finished. Setting up cluster"
 ./create-cluster.sh \
   "${location}" \

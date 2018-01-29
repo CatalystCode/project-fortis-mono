@@ -134,13 +134,38 @@ echo "Finished. Now installing Spark helm chart."
   "${translationsvctoken}"
 
 echo "Finished. Verifying deployment."
-./verify-deployment.sh \
-  "${graphql_service_host}"
-
+if [ "${endpoint_protection}" == "none" ]; then
+  ./verify-deployment.sh \
+    "${graphql_service_host}"
+else
+  # request a public ip in order to verify the cluster deployment
+  # we aren't testing the TLS ingress due to manual steps required to get 
+  # that completely setup
+  kubectl expose deployment project-fortis-services \
+    --type "LoadBalancer" \
+    --name "project-fortis-services-verification-lb"
+  # wait for the verification endpoint to come up
+  while :; do
+  	readonly fortis_service_verification_ip="$(kubectl get svc project-fortis-services-verification-lb -o jsonpath='{..ip}')"
+    if [ -n "${fortis_service_verification_ip}" ]; then break; else echo "Waiting for project-fortis-services IP"; sleep 5s; fi
+  done
+  readonly project_fortis_services_verification_endpoint="http://${fortis_service_verification_ip}"
+  ./verify-deplooyment.sh \
+  	"${project_fortis_services_verification_endpoint}"
+fi
+    
 # shellcheck disable=SC2181
 if [ $? -ne 0 ]; then
   echo "Deployment verification failed" >&2
   exit 1
+fi
+
+if [ "${endpoint_protection}" != "none" ]; then
+  kubectl delete service project-fortis-services-verification-lb
+  if [ $? -ne 0 ]; then
+    echo "Unable to delete verification endpoint" >& 2
+    exit 1
+  fi
 fi
 
 echo "Finished. Finally, creating tags containing URLs for resources so that the user can find them later."
