@@ -39,7 +39,7 @@ export const AdminSettings = createReactClass({
   mixins: [FluxMixin, StoreWatchMixin],
 
   contextTypes: {
-      router: PropTypes.object
+    router: PropTypes.object
   },
 
   getInitialState() {
@@ -61,9 +61,9 @@ export const AdminSettings = createReactClass({
   },
 
   componentDidMount() {
-      const { siteSettings } = this.props;
+    const { siteSettings } = this.props;
 
-      this.setState({ siteSettings });
+    this.setState({ siteSettings });
   },
 
   handleInputChange(event) {
@@ -104,7 +104,10 @@ export const AdminSettings = createReactClass({
     } = this.props.siteSettings.properties;
 
     const {
-      name,
+      name
+    } = this.props.siteSettings;
+
+    const {
       title,
       logo,
       targetBbox,
@@ -121,8 +124,9 @@ export const AdminSettings = createReactClass({
     const languageArray = supportedLanguages.value.split(",");
     const languageJSON = `["${languageArray.join('","')}"]`;
     const bboxJSON = `[${targetBbox.value}]`;
+
     const site = {
-      name: name.value,
+      name: name,
       targetBbox: JSON.parse(bboxJSON),
       logo: logo.value,
       defaultLocation: defaultLocation,
@@ -145,89 +149,98 @@ export const AdminSettings = createReactClass({
     this.getFlux().actions.ADMIN.save_settings(site);
   },
 
+  renderSaveButton() {
+    if (!this.state.isFormValid) {
+      return null;
+    }
+
+    return (
+      <button onClick={this.handleSaveSettings} type="button" className={!this.state.saving ? `btn btn-primary btn-sm addSiteButton` : `btn btn-success btn-sm addSiteButton`}>
+        <i className="fa fa-cloud-upload" aria-hidden="true"></i>
+        {this.state.saving ? "Saved Changes" : "Save Settings"}
+      </button>
+    );
+  },
+
   render() {
-      return (
-        this.state.siteSettings.properties ?
-          <div className="row">
-              <form ref="settingsForm">
-                  <div className="col-lg-6">
-                      <div className="form-group">
-                          <label htmlFor="siteName">Site Name<span>*</span></label>
-                          <input readOnly onChange={this.handleInputChange} required data-rule="required" name="name" data-msg="Please enter a site name" ref="name" value={this.state.siteSettings.name} type="text" style={styles.settings.input} className="form-control settings" />
-                          <div className="validation"></div>
-                      </div>
-                      <div className="form-group">
-                          <label>Site Title<span>*</span></label>
-                          <input onChange={this.handleInputChange} required data-rule="required" data-msg="Please enter a site title" name="title" ref="title" value={this.state.siteSettings.properties.title} type="text" style={styles.settings.input} className="form-control settings" />
-                          <div className="validation"></div>
-                      </div>
-                      <div className="form-group">
-                          <label htmlFor="targetBbox"><a style={styles.settings.lablelLink} href="http://boundingbox.klokantech.com/" title="Click to open bounding box selection helper too and copy the bounding box in the format north,west,south,east into the field below">Bounding Box</a> (<span style={styles.settings.labelInfo}>comma seperated e.g. 40.9,-74,40.47,-73.7</span>)<span>*</span></label>
-                          <input onChange={this.handleInputChange} required data-rule="required" name="targetBbox" data-msg="Please enter a bounding box. The format is four comma separated numbers: north,west,south,east" ref="targetBbox" value={this.state.siteSettings.properties.targetBbox} type="text" style={styles.settings.input} className="form-control settings" />
-                          <div className="validation"></div>
-                      </div>
-                      <div className="form-group">
-                          <label>Header Logo Banner<span>*</span></label>
-                          <input onChange={this.handleInputChange} required data-rule="required" data-msg="Please enter a header image for your site" name="logo" ref="logo" value={this.state.siteSettings.properties.logo} type="text" style={styles.settings.input} className="form-control settings" />
-                          <div className="validation"></div>
-                      </div>
-                      <div className="form-group">
-                          <label>Supported Languages (<span style={styles.settings.labelInfo}>comma seperated e.g. en,ar</span>)<span>*</span></label>
-                          <input onChange={this.handleInputChange} required name="supportedLanguages" ref="supportedLanguages" value={this.state.siteSettings.properties.supportedLanguages} type="text" style={styles.settings.input} className="form-control settings" />
-                          <div className="validation"></div>
-                      </div>
-                      <div className="form-group">
-                          <label>Default Languages (<span style={styles.settings.labelInfo}>e.g. en</span>)<span>*</span></label>
-                          <input onChange={this.handleInputChange} required name="defaultLanguage" ref="defaultLanguage" value={this.state.siteSettings.properties.defaultLanguage} type="text" style={styles.settings.input} className="form-control settings" />
-                          <div className="validation"></div>
-                      </div>
-                    </div>
-                    <div className="col-lg-6">
-                      <div className="form-group">
-                          <label>Feature Service Namespace</label>
-                          <input onChange={this.handleInputChange} required name="featureservicenamespace" ref="featureservicenamespace" value={this.state.siteSettings.properties.featureservicenamespace} type="text" style={styles.settings.input} className="form-control settings" />
-                          <div className="validation"></div>
-                      </div>
-                      <div className="form-group">
-                          <label>MapBox Token</label>
-                          <input onChange={this.handleInputChange} required name="mapSvcToken" ref="mapSvcToken" value={this.state.siteSettings.properties.mapSvcToken} type="text" style={styles.settings.input} className="form-control settings secret" />
-                          <div className="validation"></div>
-                      </div>
-                      <div className="form-group">
-                          <label>Translation Services Token</label>
-                          <input onChange={this.handleInputChange} required name="translationSvcToken" ref="translationSvcToken" value={this.state.siteSettings.properties.translationSvcToken} type="text" style={styles.settings.input} className="form-control settings secret" />
-                          <div className="validation"></div>
-                      </div>
-                      <div className="form-group">
-                          <label>Cognitive Speech Services Token</label>
-                          <input onChange={this.handleInputChange} required name="cogSpeechSvcToken" ref="cogSpeechSvcToken" value={this.state.siteSettings.properties.cogSpeechSvcToken} type="text" style={styles.settings.input} className="form-control settings secret" />
-                          <div className="validation"></div>
-                      </div>
-                      <div className="form-group">
-                          <label>Cognitive Vision Services Token</label>
-                          <input onChange={this.handleInputChange} required name="cogVisionSvcToken" ref="cogVisionSvcToken" value={this.state.siteSettings.properties.cogVisionSvcToken} type="text" style={styles.settings.input} className="form-control settings secret" />
-                          <div className="validation"></div>
-                      </div>
-                      <div className="form-group">
-                          <label>Cognitive Text Services Token</label>
-                          <input onChange={this.handleInputChange} required name="cogTextSvcToken" ref="cogTextSvcToken" value={this.state.siteSettings.properties.cogTextSvcToken} type="text" style={styles.settings.input} className="form-control settings secret" />
-                          <div className="validation"></div>
-                      </div>
-                      <div className="form-group">
-                          <p style={styles.settings.buttonRow}>
-                          {
-                              this.state.isFormValid ?
-                                  <button onClick={this.handleSaveSettings} type="button" className={!this.state.saving ? `btn btn-primary btn-sm addSiteButton` : `btn btn-success btn-sm addSiteButton`}>
-                                    <i className="fa fa-cloud-upload" aria-hidden="true"></i> {this.state.saving ? "Saved Changes" : "Save Settings"}
-                                  </button>
-                              : undefined
-                          }
-                          </p>
-                      </div>
-                  </div>
-              </form>
+    if (!this.state.siteSettings.properties) {
+      return <div />;
+    }
+
+    return (
+      <div className="row">
+        <form ref="settingsForm">
+          <div className="col-lg-6">
+            <div className="form-group">
+              <label htmlFor="siteName">Site Name<span>*</span></label>
+              <input readOnly onChange={this.handleInputChange} required data-rule="required" name="name" data-msg="Please enter a site name" ref="name" value={this.state.siteSettings.name} type="text" style={styles.settings.input} className="form-control settings" />
+              <div className="validation"></div>
+            </div>
+            <div className="form-group">
+              <label>Site Title<span>*</span></label>
+              <input onChange={this.handleInputChange} required data-rule="required" data-msg="Please enter a site title" name="title" ref="title" value={this.state.siteSettings.properties.title} type="text" style={styles.settings.input} className="form-control settings" />
+              <div className="validation"></div>
+            </div>
+            <div className="form-group">
+              <label htmlFor="targetBbox"><a style={styles.settings.lablelLink} href="http://boundingbox.klokantech.com/" title="Click to open bounding box selection helper too and copy the bounding box in the format north,west,south,east into the field below">Bounding Box</a> (<span style={styles.settings.labelInfo}>comma seperated e.g. 40.9,-74,40.47,-73.7</span>)<span>*</span></label>
+              <input onChange={this.handleInputChange} required data-rule="required" name="targetBbox" data-msg="Please enter a bounding box. The format is four comma separated numbers: north,west,south,east" ref="targetBbox" value={this.state.siteSettings.properties.targetBbox} type="text" style={styles.settings.input} className="form-control settings" />
+              <div className="validation"></div>
+            </div>
+            <div className="form-group">
+              <label>Header Logo Banner<span>*</span></label>
+              <input onChange={this.handleInputChange} required data-rule="required" data-msg="Please enter a header image for your site" name="logo" ref="logo" value={this.state.siteSettings.properties.logo} type="text" style={styles.settings.input} className="form-control settings" />
+              <div className="validation"></div>
+            </div>
+            <div className="form-group">
+              <label>Supported Languages (<span style={styles.settings.labelInfo}>comma seperated e.g. en,ar</span>)<span>*</span></label>
+              <input onChange={this.handleInputChange} required name="supportedLanguages" ref="supportedLanguages" value={this.state.siteSettings.properties.supportedLanguages} type="text" style={styles.settings.input} className="form-control settings" />
+              <div className="validation"></div>
+            </div>
+            <div className="form-group">
+              <label>Default Languages (<span style={styles.settings.labelInfo}>e.g. en</span>)<span>*</span></label>
+              <input onChange={this.handleInputChange} required name="defaultLanguage" ref="defaultLanguage" value={this.state.siteSettings.properties.defaultLanguage} type="text" style={styles.settings.input} className="form-control settings" />
+              <div className="validation"></div>
+            </div>
           </div>
-          : <div />
-      );
+          <div className="col-lg-6">
+            <div className="form-group">
+              <label>Feature Service Namespace</label>
+              <input onChange={this.handleInputChange} required name="featureservicenamespace" ref="featureservicenamespace" value={this.state.siteSettings.properties.featureservicenamespace} type="text" style={styles.settings.input} className="form-control settings" />
+              <div className="validation"></div>
+            </div>
+            <div className="form-group">
+              <label>MapBox Token</label>
+              <input onChange={this.handleInputChange} required name="mapSvcToken" ref="mapSvcToken" value={this.state.siteSettings.properties.mapSvcToken} type="text" style={styles.settings.input} className="form-control settings secret" />
+              <div className="validation"></div>
+            </div>
+            <div className="form-group">
+              <label>Translation Services Token</label>
+              <input onChange={this.handleInputChange} required name="translationSvcToken" ref="translationSvcToken" value={this.state.siteSettings.properties.translationSvcToken} type="text" style={styles.settings.input} className="form-control settings secret" />
+              <div className="validation"></div>
+            </div>
+            <div className="form-group">
+              <label>Cognitive Speech Services Token</label>
+              <input onChange={this.handleInputChange} required name="cogSpeechSvcToken" ref="cogSpeechSvcToken" value={this.state.siteSettings.properties.cogSpeechSvcToken} type="text" style={styles.settings.input} className="form-control settings secret" />
+              <div className="validation"></div>
+            </div>
+            <div className="form-group">
+              <label>Cognitive Vision Services Token</label>
+              <input onChange={this.handleInputChange} required name="cogVisionSvcToken" ref="cogVisionSvcToken" value={this.state.siteSettings.properties.cogVisionSvcToken} type="text" style={styles.settings.input} className="form-control settings secret" />
+              <div className="validation"></div>
+            </div>
+            <div className="form-group">
+              <label>Cognitive Text Services Token</label>
+              <input onChange={this.handleInputChange} required name="cogTextSvcToken" ref="cogTextSvcToken" value={this.state.siteSettings.properties.cogTextSvcToken} type="text" style={styles.settings.input} className="form-control settings secret" />
+              <div className="validation"></div>
+            </div>
+            <div className="form-group">
+              <p style={styles.settings.buttonRow}>
+                {this.renderSaveButton()}
+              </p>
+            </div>
+          </div>
+        </form>
+      </div>
+    );
   }
 });
