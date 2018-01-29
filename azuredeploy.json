@@ -9,10 +9,10 @@
             "type": "string"
         },
         "githubProjectRelease": {
-        	"metadata": {
-        		"description": "The release or branch to use for deploying Fortis."
-        	},
-        	"type": "string"
+            "metadata": {
+                "description": "The release or branch to use for deploying Fortis."
+            },
+            "type": "string"
         },
         "siteName": {
             "type": "string",
