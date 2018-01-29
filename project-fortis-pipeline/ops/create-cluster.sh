@@ -149,7 +149,9 @@ else
     fortis_service_verification_ip="$(kubectl get svc project-fortis-services-verification-lb -o jsonpath='{..ip}')"
     if [ -n "${fortis_service_verification_ip}" ]; then break; else echo "Waiting for project-fortis-services-verification IP"; sleep 5s; fi
   done
+  echo "Got service IP: ${fortis_service_verification_ip}"
   project_fortis_services_verification_endpoint="http://${fortis_service_verification_ip}"
+  echo "Endpoint: ${project_fortis_services_verification_endpoint}"
   ./verify-deplooyment.sh \
   	"${project_fortis_services_verification_endpoint}"
 fi
