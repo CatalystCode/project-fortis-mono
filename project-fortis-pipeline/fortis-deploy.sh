@@ -154,6 +154,10 @@ while [[ $# -gt 0 ]]; do
       gh_clone_path="$1"
       shift
       ;;
+    --gh_clone_release|-gr)
+      gh_clone_release="$1"
+      shift
+      ;;
     --location|-lo)
       location="$1"
       shift
@@ -284,6 +288,7 @@ throw_if_empty --master_fqdn "${master_fqdn}"
 throw_if_empty --storage_account_name "${storage_account_name}"
 throw_if_empty --storage_account_key "${storage_account_key}"
 throw_if_empty --gh_clone_path "${gh_clone_path}"
+throw_if_empty --gh_clone_release "{gh_clone_release}"
 throw_if_empty --spark_worker_count "${spark_worker_count}"
 throw_if_empty --cassandra_node_count "${cassandra_node_count}"
 throw_if_empty --site_type "${site_type}"
@@ -346,7 +351,11 @@ fi
 
 echo "Finished. Installing deployment scripts"
 if ! (command -v git >/dev/null); then sudo apt-get -qq install -y git; fi
-git clone --depth=1 "${gh_clone_path}" /tmp/fortis-project
+git clone -b "${gh_clone_release}" --depth=1 "${gh_clone_path}" /tmp/fortis-project
+if [ $? -ne 0 ]; then
+  echo "Clone of ${gh_clone_path}, branch ${gh_clone_release} failed."
+  exit -2
+fi
 cp -r /tmp/fortis-project/project-fortis-pipeline .
 cd project-fortis-pipeline/ops/ || exit -2
 chmod 752 create-cluster.sh
