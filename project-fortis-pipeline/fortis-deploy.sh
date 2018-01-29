@@ -298,7 +298,12 @@ throw_if_empty --eh_conn_str "${eh_conn_str}"
 throw_if_empty --sb_conn_str "${sb_conn_str}"
 throw_if_empty --agent_vm_size "${agent_vm_size}"
 throw_if_empty --mapbox_access_token "${mapbox_access_token}"
-if [ "${endpoint_protection}" = "tls_provide_certificate" ]; then
+
+# only "none" and "tls_provide_certificate" supported currently
+if [ "${endpoint_protection}" == "tls_lets_encrypt" ]; then
+  echo "'tls_lets_encrypt' not yet supported." 1>&2; print_usage; exit -1
+fi
+if [ "${endpoint_protection}" == "tls_provide_certificate" ]; then
   throw_if_tls_certificate_info_not_complete "${ingress_hostname}" "${tls_certificate}" "${tls_key}"
 fi
 
