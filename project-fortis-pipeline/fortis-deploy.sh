@@ -234,6 +234,12 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+echo "*********"
+echo "${ingress_hostname}"
+echo "${lets_encrypt_email}"
+echo "${lets_encrypt_api_endpoint}"
+echo "*********"
+
 install_azure_cli() {
   sudo apt-get -qq update && sudo apt-get -qq install -y libssl-dev libffi-dev python-dev
   echo "deb [arch=amd64] https://apt-mo.trafficmanager.net/repos/azure-cli/ wheezy main" | sudo tee /etc/apt/sources.list.d/azure-cli.list
