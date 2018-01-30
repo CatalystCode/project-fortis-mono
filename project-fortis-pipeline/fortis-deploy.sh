@@ -45,8 +45,8 @@ Arguments
   --ingress_hostname|-ih             [Optional] : Hostname for TLS ingress
   --tls_certificate|-tc              [Optional] : Certificate (in base64) for TLS
   --tls_key|-tk                      [Optional] : Private key (in base64) for TLS
-  --lets_encrypt_email|-lee			 [Optional] : Email to register with Let's Encrypt
-  --lets_encrypt_api_endpoint|-leae  [Optional] : Let's Encrypt API endpoint
+  --lets_encrypt_email|-le			 [Optional] : Email to register with Let's Encrypt
+  --lets_encrypt_api_endpoint|-lae   [Optional] : Let's Encrypt API endpoint
 EOF
 }
 
@@ -220,11 +220,11 @@ while [[ $# -gt 0 ]]; do
       tls_key="$1"
       shift
       ;;
-    --lets_encrypt_email|-lee)
+    --lets_encrypt_email|-le)
       lets_encrypt_email="$1"
       shift
       ;;
-    --lets_encrypt_api_endpoint|-leae)
+    --lets_encrypt_api_endpoint|-lae)
       lets_encrypt_api_endpoint="$1"
       shift
       ;;
