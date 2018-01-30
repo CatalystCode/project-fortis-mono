@@ -14,19 +14,17 @@ export default class MapBoundingReset extends React.Component {
 
   onClick = () => {
     this.props.onClick();
-    this.setState({
-      expanded: !this.state.expanded
-    });
   }
 
   render() {
-    const { tooltipOn, tooltipOff, tooltipPosition } = this.props;
-    const { expanded } = this.state;
+    const { tooltipPosition } = this.props;
+    const tooltip = `Click to reset map boundaries. `;
+
 
     return (
       <div>
-        <IconButton tooltip={expanded ? tooltipOff : tooltipOn} onClick={this.onClick} tooltipPosition={tooltipPosition}>
-          {expanded ? <Map color={fullWhite} /> : <Map color={fullWhite} />}
+        <IconButton tooltip={tooltip} onClick={this.onClick} tooltipPosition={tooltipPosition}>
+          {<Map color={fullWhite} />}
         </IconButton>
       </div>
     );
