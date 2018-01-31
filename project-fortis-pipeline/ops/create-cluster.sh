@@ -99,7 +99,7 @@ if [ "${endpoint_protection}" == "none" ]; then
 else
   readonly graphql_service_host="https://${tls_hostname}"
   if [ "${endpoint_protection}" == "tls_lets_encrypt" ]; then
-  	readonly mx_record_entry="@.""$(echo ${lets_encrypt_email} | awk -F'@' '{print $2}')"
+  	readonly mx_record_entry="@.""${lets_encrypt_email#*@}"
   fi
 fi
 
@@ -171,6 +171,7 @@ fi
 
 if [ "${endpoint_protection}" != "none" ]; then
   kubectl delete service project-fortis-services-verification-lb
+  # shellcheck disable=SC2181
   if [ $? -ne 0 ]; then
     echo "Unable to delete verification endpoint" >& 2
     exit 1

@@ -11,11 +11,12 @@ readonly mx_record_entry="${7}"
 az group update --name "${k8resource_group}" --set tags.FORTIS_INTERFACE_URL="${fortis_interface_host}/index.html#/site/${site_name}"
 az group update --name "${k8resource_group}" --set tags.FORTIS_ADMIN_INTERFACE_URL="${fortis_interface_host}/index.html#/site/${site_name}/admin"
 az group update --name "${k8resource_group}" --set tags.FORTIS_SERVICE_HOST="${graphql_service_host}"
-if [ ! -z "${dns_host_name}" ]; then
+if [ -n "${dns_host_name}" ]; then
   az group update --name "${k8resource_group}" --set tags.FORTIS_DNS_NAME="${dns_host_name}"
   az group update --name "${k8resource_group}" --set tags.FORTIS_DNS_IP="${dns_host_ip}"
 fi
-if [ ! -z "${mx_record_entry}" ]; then
-  echo "here"
+if [ -n "${mx_record_entry}" ]; then
+  # note: the space in front of the tag value is intentional as the `az` command otherwise 
+  #       interprets the value following (if it has an @ at the beginning) as a filename
   az group update --name "${k8resource_group}" --set tags.FORTIS_MX_RECORD=" ${mx_record_entry}"
 fi

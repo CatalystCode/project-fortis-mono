@@ -25,6 +25,7 @@ Arguments
   --cassandra_node_count|-cn         [Required] : Cassandra Node Count
   --app_insights_id|-aii             [Required] : Application Insights Instramentation Key
   --gh_clone_path|-gc                [Required] : Github path to clone
+  --gh_clone_release|-gr             [Required] : Github branch / release to clone
   --location|-lo                     [Required] : Container cluster location
   --site_type|-sty                   [Required] : Fortis Site Type
   --prefix|-pf                       [Required] : Fortis Site Prefix
@@ -45,7 +46,7 @@ Arguments
   --ingress_hostname|-ih             [Optional] : Hostname for TLS ingress
   --tls_certificate|-tc              [Optional] : Certificate (in base64) for TLS
   --tls_key|-tk                      [Optional] : Private key (in base64) for TLS
-  --lets_encrypt_email|-le			 [Optional] : Email to register with Let's Encrypt
+  --lets_encrypt_email|-le           [Optional] : Email to register with Let's Encrypt
   --lets_encrypt_api_endpoint|-lae   [Optional] : Let's Encrypt API endpoint
 EOF
 }
@@ -60,7 +61,7 @@ throw_if_tls_certificate_info_not_complete() {
   local hostname="$1"
   local certificate="$2"
   local key="$3"
-  if [[ ! -z "$hostname" ]] && [[ ! -z "$certificate" ]] && [[ ! -z "$key" ]]; then
+  if [ -n "$hostname" ] && [ -n "$certificate" ] && [ -n "$key" ]; then
     return
   fi
   echo  "endpoint_protection with value 'tls_provide_certificate' requires fields 'ingress_hostname', 'tls_certificate', 'tls_key' be fully filled out." 1>&2
@@ -72,7 +73,7 @@ throw_if_tls_lets_encrypt_info_not_complete() {
   local hostname="$1"
   local email="$2"
   local endpoint="$3"
-  if [[ ! -z "${hostname}" ]] && [[ ! -z "${email}" ]] && [[ ! -z "${endpoint}" ]]; then
+  if [[ -n "${hostname}" ]] && [[ -n "${email}" ]] && [[ -n "${endpoint}" ]]; then
     return
   fi
   echo  "endpoint_protection with value 'tls_lets_encrypt' requires fields 'ingress_hostname', 'lets_encrypt_email', 'lets_encrypt_api_endpoint' be fully filled out." 1>&2
