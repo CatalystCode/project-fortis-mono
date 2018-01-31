@@ -89,12 +89,13 @@ export default class TimeSeriesGraph extends React.Component {
   componentWillReceiveProps(nextProps) {
     if (hasChanged(this.props, nextProps)){
       this.refreshChart(nextProps);
+    }
   }
 
   resetTimeline = () => {
     this.props.refreshDashboardFunction(false, null);
     this.setState({timelineHasBeenCustomized: false});
-}
+  }
 
   handleDataFetch = () => {
     const { dataSource, timespanType, bbox, selectedplace, termFilters, timeSeriesGraphData, zoomLevel, externalsourceid, maintopic } = this.props;

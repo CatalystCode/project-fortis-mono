@@ -16,8 +16,8 @@ import 'react-grid-layout/css/styles.css';
 import '../../styles/Insights/Dashboard.css';
 import { changeCategory } from '../../routes/routes';
 import HeatmapToggle from './HeatmapToggle';
-import CategoryPicker from './CategoryPicker';
 import MapBoundingReset from './MapBoundingReset';
+import CategoryPicker from './CategoryPicker';
 import ShareButton from './ShareButton';
 import LanguagePicker from './LanguagePicker';
 
