@@ -87,17 +87,20 @@ echo "Finished. Now setting up fortis graphql service in kubernetes."
   "${lets_encrypt_email}" \
   "${lets_encrypt_api_endpoint}"
 while :; do
-  if [ "${endpoint_protection}" = "none" ]; then
+  if [ "${endpoint_protection}" == "none" ]; then
   	fortis_service_ip="$(kubectl get svc project-fortis-services-lb -o jsonpath='{..ip}')"
   else
   	fortis_service_ip="$(kubectl get svc/nginx-ingress-controller --namespace=nginx-ingress -o jsonpath='{..ip}')"
   fi
   if [ -n "${fortis_service_ip}" ]; then break; else echo "Waiting for project-fortis-services IP"; sleep 5s; fi
 done
-if [ "${endpoint_protection}" = "none" ]; then
-	readonly graphql_service_host="http://${fortis_service_ip}"
+if [ "${endpoint_protection}" == "none" ]; then
+  readonly graphql_service_host="http://${fortis_service_ip}"
 else
-	readonly graphql_service_host="https://${tls_hostname}"
+  readonly graphql_service_host="https://${tls_hostname}"
+  if [ "${endpoint_protection}" == "tls_lets_encrypt" ]; then
+    readonly mx_record_entry="@.${tls_hostname}"
+  fi
 fi
 
 echo "Finished. Now setting up fortis react frontend."
@@ -179,6 +182,9 @@ echo "Finished. Finally, creating tags containing URLs for resources so that the
   "${k8resource_group}" \
   "${fortis_interface_host}" \
   "${site_name}" \
-  "${graphql_service_host}"
+  "${graphql_service_host}" \
+  "${tls_hostname}" \
+  "${fortis_service_ip}" \
+  "${mx_record_entry}"
 
 echo "All done :)"
