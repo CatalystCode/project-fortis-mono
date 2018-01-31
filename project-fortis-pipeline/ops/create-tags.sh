@@ -22,7 +22,7 @@ if [ ! -z "${dns_host_name}" ]; then
 fi
 echo "^^^^ ${mx_record_entry}"
 if [ ! -z "${mx_record_entry}" ]; then
-  echo "here""
+  echo "here"
   az group update --name "${k8resource_group}" --set tags.FORTIS_MX_RECORD="${mx_record_entry}"
 fi
 echo "#### ${mx_record_entry}"
