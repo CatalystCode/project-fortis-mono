@@ -234,12 +234,6 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-echo "*********"
-echo "${ingress_hostname}"
-echo "${lets_encrypt_email}"
-echo "${lets_encrypt_api_endpoint}"
-echo "*********"
-
 install_azure_cli() {
   sudo apt-get -qq update && sudo apt-get -qq install -y libssl-dev libffi-dev python-dev
   echo "deb [arch=amd64] https://apt-mo.trafficmanager.net/repos/azure-cli/ wheezy main" | sudo tee /etc/apt/sources.list.d/azure-cli.list
@@ -327,12 +321,6 @@ throw_if_empty --sb_conn_str "${sb_conn_str}"
 throw_if_empty --agent_vm_size "${agent_vm_size}"
 throw_if_empty --mapbox_access_token "${mapbox_access_token}"
 
-
-echo "---------"
-echo "${ingress_hostname}"
-echo "${lets_encrypt_email}"
-echo "${lets_encrypt_api_endpoint}"
-echo "---------"
 if [ "${endpoint_protection}" == "tls_provide_certificate" ]; then
   throw_if_tls_certificate_info_not_complete "${ingress_hostname}" "${tls_certificate}" "${tls_key}"
 elif [ "${endpoint_protection}" == "tls_lets_encrypt" ]; then
