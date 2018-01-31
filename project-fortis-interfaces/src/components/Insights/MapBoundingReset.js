@@ -6,25 +6,17 @@ import { fullWhite } from 'material-ui/styles/colors';
 export default class MapBoundingReset extends React.Component {
   constructor(props) {
     super(props);
-
-    this.state = {
-      expanded: false
-    };
-  }
-
-  onClick = () => {
-    this.props.onClick();
   }
 
   render() {
     const { tooltipPosition } = this.props;
-    const tooltip = `Click to reset map boundaries. `;
+    const tooltip = `Click to reset map boundaries.`;
 
 
     return (
       <div>
-        <IconButton tooltip={tooltip} onClick={this.onClick} tooltipPosition={tooltipPosition}>
-          {<Map color={fullWhite} />}
+        <IconButton tooltip={tooltip} onClick={this.props.onClick} tooltipPosition={tooltipPosition}>
+          <Map color={fullWhite} />
         </IconButton>
       </div>
     );

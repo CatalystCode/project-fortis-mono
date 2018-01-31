@@ -252,8 +252,6 @@ export default class Dashboard extends React.Component {
           </div>
           <div className="dashboard-action">
             <MapBoundingReset
-              tooltipOn="Click to reset map boundaries"
-              tooltipOff="Click to reset map boundaries"
               tooltipPosition="top-center"
               onClick={this.clickMapReset}
             />
