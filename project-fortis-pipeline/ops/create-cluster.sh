@@ -99,7 +99,7 @@ if [ "${endpoint_protection}" == "none" ]; then
 else
   readonly graphql_service_host="https://${tls_hostname}"
   if [ "${endpoint_protection}" == "tls_lets_encrypt" ]; then
-    readonly mx_record_entry="@.${tls_hostname}"
+  	readonly mx_record_entry="@.""$(echo ${lets_encrypt_email} | awk -F'@' '{print $2}')"
   fi
 fi
 
