@@ -4,11 +4,9 @@ import Map from 'material-ui/svg-icons/maps/map';
 import { fullWhite } from 'material-ui/styles/colors';
 
 export default class MapBoundingReset extends React.Component {
-  
   render() {
     const { tooltipPosition } = this.props;
     const tooltip = `Click to reset map boundaries.`;
-
 
     return (
       <div>
