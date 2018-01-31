@@ -29,7 +29,7 @@ readonly tls_key_b64="${26}"
 readonly lets_encrypt_email="${27}"
 readonly lets_encrypt_api_endpoint"${28}"
 
-if [ -z "${aad_client}" ]; then readonly fortis_interface_protocol="http"; else readonly fortis_interface_protocol="https"; fi
+if [ -n "${aad_client}" ] || [ "${endpoint_protection}" != "none" ]; then readonly fortis_interface_protocol="https"; else readonly fortis_interface_protocol="http"; fi
 readonly feature_service_host="http://fortis-features.eastus.cloudapp.azure.com"
 readonly fortis_central_directory="https://fortiscentral.blob.core.windows.net/"
 readonly fortis_interface_container="public"
