@@ -8,11 +8,6 @@ readonly dns_host_name="${5}"
 readonly dns_host_ip="${6}"
 readonly mx_record_entry="${7}"
 
-echo "+#+#+#+#+#"
-echo "${dns_host_name}"
-echo "${dns_host_ip}"
-echo "${mx_record_entry}"
-echo "+#+#+#+#+#"
 az group update --name "${k8resource_group}" --set tags.FORTIS_INTERFACE_URL="${fortis_interface_host}/index.html#/site/${site_name}"
 az group update --name "${k8resource_group}" --set tags.FORTIS_ADMIN_INTERFACE_URL="${fortis_interface_host}/index.html#/site/${site_name}/admin"
 az group update --name "${k8resource_group}" --set tags.FORTIS_SERVICE_HOST="${graphql_service_host}"
@@ -20,9 +15,7 @@ if [ ! -z "${dns_host_name}" ]; then
   az group update --name "${k8resource_group}" --set tags.FORTIS_DNS_NAME="${dns_host_name}"
   az group update --name "${k8resource_group}" --set tags.FORTIS_DNS_IP="${dns_host_ip}"
 fi
-echo "^^^^ ${mx_record_entry}"
 if [ ! -z "${mx_record_entry}" ]; then
   echo "here"
-  az group update --name "${k8resource_group}" --set tags.FORTIS_MX_RECORD="${mx_record_entry}"
+  az group update --name "${k8resource_group}" --set tags.FORTIS_MX_RECORD=" ${mx_record_entry}"
 fi
-echo "#### ${mx_record_entry}"
