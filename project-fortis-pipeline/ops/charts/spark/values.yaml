@@ -54,6 +54,8 @@ Worker:
     value: 1g
   - name: SPARK_WORKER_MEMORY
     value: 1g
+  - name: SPARK_WORKER_OPTS
+    value: "-Dspark.worker.cleanup.enabled=true -Dspark.worker.cleanup.interval=10  -Dspark.worker.cleanup.appDataTtl=10"
 
 Zeppelin:
   Name: zeppelin
