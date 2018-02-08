@@ -113,9 +113,9 @@ function cassandraRowToStream(row) {
 
   let params;
   try {
-    params = params ? JSON.parse(row.params_json) : {};
+    params = row.params_json ? JSON.parse(row.params_json) : {};
   } catch (err) {
-    console.error(`Unable to parse params ${row.params_json}'' for stream ${row.streamid}`);
+    console.error(`Unable to parse params '${row.params_json}' for stream ${row.streamid}`);
     params = {};
   }
 
