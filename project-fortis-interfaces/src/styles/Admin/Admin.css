@@ -19,6 +19,12 @@ label span {
   color: #F00;
 }
 
+div.settings.secret > input {
+  -webkit-text-security: disc;
+  -moz-text-security: disc;
+  text-security: disc;
+}
+
 input.settings.secret {
   -webkit-text-security: disc;
   -moz-text-security: disc;

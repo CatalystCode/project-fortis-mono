@@ -1,9 +1,9 @@
 import React from 'react';
-import { DataGrid } from './DataGrid';
+import { DataGrid } from '../DataGrid';
 import Glyphicon from 'react-bootstrap/lib/Glyphicon';
 import Button from 'react-bootstrap/lib/Button';
 import Modal from 'react-bootstrap/lib/Modal';
-import { getColumns } from './shared';
+import { getColumns } from '../shared';
 
 class StreamParamsButtonFormatter extends React.Component {
   constructor(props) {
@@ -20,13 +20,13 @@ class StreamParamsButtonFormatter extends React.Component {
     this.handleSave = this.handleSave.bind(this);
   }
 
-  handleSave() {
+  handleSave = () => {
     const stream = this.prepareStreamsForSave();
-    this.props.flux.actions.ADMIN.save_streams(stream);
+    this.props.flux.actions.ADMIN.save_stream(stream);
     this.handleHideDetails();
   }
 
-  prepareStreamsForSave() {
+  prepareStreamsForSave = () => {
     let stream = this.getStream();
     if (typeof this.state.params === 'string') {
       stream.params = JSON.parse(this.state.params);
@@ -37,13 +37,14 @@ class StreamParamsButtonFormatter extends React.Component {
     return stream;
   }
 
-  handleShowDetails() {
+  handleShowDetails = () => {
     const stream = this.getStream();
-
     let params = stream.params;
     if (typeof stream.params === 'string') {
       params = JSON.parse(stream.params);
     }
+
+    this.convertParamValuesToString(params);
 
     this.setState({
       isShowDetailOn: true,
@@ -51,17 +52,27 @@ class StreamParamsButtonFormatter extends React.Component {
     });
   }
 
-  getStream() {
+  convertParamValuesToString = (params) => {
+    params.forEach(param => {
+      if (typeof param.value === 'boolean') {
+        param.value = param.value.toString();
+      } else if (param.value.constructor === Array) {
+        param.value = param.value.join();
+      }
+    });
+  }
+
+  getStream = () => {
     return this.props.dependentValues;
   }
 
-  handleHideDetails() {
+  handleHideDetails = () => {
     this.setState({
       isShowDetailOn: false
     });
   }
 
-  getStreamParamColumns() {
+  getStreamParamColumns = () => {
     const columnValues = [
       {key: "key", name: "key"},
       {editable: true, key: "value", name: "value"}

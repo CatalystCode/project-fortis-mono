@@ -3,9 +3,19 @@ import { ResponseHandler } from '../shared';
 import { doNothing } from '../../utils/Utils';
 import constants from '../constants';
 import differenceBy from 'lodash/differenceBy';
+import differenceWith from 'lodash/differenceWith';
+import some from 'lodash/some';
 
 function getListAfterRemove(listBeforeRemove, itemsRemoved, keyBy) {
-  return differenceBy(listBeforeRemove, itemsRemoved, keyBy);
+  const customComparator = (a, b) => {
+    function isPropertyEqual(property) {
+      return a[property] === b[property];
+    }
+    return keyBy.every(isPropertyEqual);
+  }
+
+  if (keyBy.constructor === Array) return differenceWith(listBeforeRemove, itemsRemoved, customComparator);
+  else return differenceBy(listBeforeRemove, itemsRemoved, keyBy);
 }
 
 function addIdsToUsersForGrid(users) {
@@ -153,15 +163,38 @@ const _methods = {
       }
     },
 
-    save_streams(streams) {
-      const self = this;
+    save_stream(streams) {
       AdminServices.saveStreams(streams, (err, response, body) => ResponseHandler(err, response, body, (error, graphqlResponse) => {
         if (graphqlResponse) {
-          const action = "saved";
-          const streamsAfterSave = this.flux.stores.AdminStore.dataStore.streams;
-          self.dispatch(constants.ADMIN.LOAD_STREAMS, { action, response: streamsAfterSave });
+          const streamsListed = this.flux.stores.AdminStore.dataStore.streams;
+          const savedStreamExistsInStreamsListed = () => some(streamsListed, stream => (stream.pipelineKey === streams[0].pipelineKey) && (stream.streamId === streams[0].streamId));
+          
+          const updateStreamInStreamsListed = () => streamsListed.forEach(stream => {
+            if (stream.pipelineKey === streams[0].pipelineKey && stream.streamId === streams[0].streamId) {
+              stream.params = streams[0].params;
+            }
+          })
+          
+          const insertStreamInStreamsListed = () => streamsListed.push(streams[0]);
+
+          savedStreamExistsInStreamsListed() ? updateStreamInStreamsListed() : insertStreamInStreamsListed();
+
+          this.dispatch(constants.ADMIN.LOAD_STREAMS, { action: 'saved', response: streamsListed });
         } else {
-          self.dispatch(constants.ADMIN.LOAD_FAIL, { error: `[${error}]: Error, could not load streams for admin page.` });
+          this.dispatch(constants.ADMIN.LOAD_FAIL, { error: `[${error}]: Error, could not load streams for admin page.` });
+        }
+      }));
+    },
+
+    remove_streams(streams) {
+      AdminServices.removeStreams(streams, (err, response, body) => ResponseHandler(err, response, body, (error, graphqlResponse) => {
+        if (graphqlResponse) {
+          const streamsBeforeRemove = this.flux.stores.AdminStore.dataStore.streams;
+          const streamsRemoved = graphqlResponse.removeStreams.streams;
+          const streamsAfterRemove = getListAfterRemove(streamsBeforeRemove, streamsRemoved, ['pipelineKey', 'streamId']);
+          this.dispatch(constants.ADMIN.LOAD_STREAMS, { action: 'saved', response: streamsAfterRemove });
+        } else {
+          this.dispatch(constants.ADMIN.LOAD_FAIL, { error: `[${error}]: Error, could not load streams for admin page.` });
         }
       }));
     },
