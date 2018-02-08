@@ -9,6 +9,7 @@ import net.liftweb.json
 import org.apache.spark.SparkContext
 
 import scala.compat.java8.FunctionConverters._
+import scala.util.{Failure, Success, Try}
 
 @SerialVersionUID(100L)
 class CassandraConfigurationManager extends ConfigurationManager with Serializable with Loggable {
@@ -34,17 +35,15 @@ class CassandraConfigurationManager extends ConfigurationManager with Serializab
       implicit val formats = json.DefaultFormats
 
       val trustedSources = connectorToTrustedSources.computeIfAbsent(pipeline, (fetchTrustedSources _).asJava)
-      val params = json.parse(stream.params_json).extract[Map[String, String]]
+
+      val params = Try(json.parse(stream.params_json).extract[Map[String, String]]) match {
+        case Failure(_) => Map[String, String]()
+        case Success(map) => map
+      }
 
       ConnectorConfig(
         stream.streamfactory,
-        params +
-          (
-            "trustedSources" -> trustedSources,
-            "streamId" -> stream.streamid
-          )
-      )
-
+        params + ("trustedSources" -> trustedSources, "streamId" -> stream.streamid))
     }).toList
   }
 
@@ -67,8 +66,15 @@ class CassandraConfigurationManager extends ConfigurationManager with Serializab
       .flatMap(row => {
         implicit val formats = json.DefaultFormats
 
-        (row.getString("lang_code"),
-         row.getString("topic")) :: json.parse(row.getString("translations_json")).extract[Map[String, String]].toList
+        val translations = (row.getStringOption("translations_json") match {
+          case None => Map[String, String]()
+          case Some(jsonString) if jsonString.equals("") => Map[String, String]()
+          case Some(jsonString) => Try(json.parse(jsonString).extract[Map[String, String]]) match {
+            case Failure(_) => Map[String, String]()
+            case Success(map) => map
+        }}).toList
+
+        (row.getString("lang_code"), row.getString("topic")) :: translations
       })
       .mapValues(List(_))
       .reduceByKey(_ ::: _)
@@ -82,8 +88,16 @@ class CassandraConfigurationManager extends ConfigurationManager with Serializab
       .map(row => {
         implicit val formats = json.DefaultFormats
 
+        val conjunctivefilter = (row.getStringOption("conjunctivefilter_json") match {
+          case None => List[String]()
+          case Some(jsonString) if jsonString.equals("") => List[String]()
+          case Some(jsonString) => Try(json.parse(jsonString).extract[List[String]]) match {
+            case Failure(_) => List[String]()
+            case Success(list) => list
+        }}).toSet
+
         BlacklistedItem(
-          json.parse(row.getString("conjunctivefilter_json")).extract[List[String]].toSet,
+          conjunctivefilter,
           row.getBooleanOption("islocation").getOrElse(false))
       })
 
