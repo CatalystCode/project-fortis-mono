@@ -113,9 +113,9 @@ function cassandraRowToStream(row) {
 
   let params;
   try {
-    params = params ? JSON.parse(params) : {};
+    params = params ? JSON.parse(row.params_json) : {};
   } catch (err) {
-    console.error(`Unable to parse params for stream ${row.streamid}`);
+    console.error(`Unable to parse params ${row.params_json}'' for stream ${row.streamid}`);
     params = {};
   }
 
@@ -160,7 +160,7 @@ function cassandraRowToTermFilter(row) {
   try {
     filteredTerms = row.conjunctivefilter_json ? JSON.parse(row.conjunctivefilter_json) : [];
   } catch (err) {
-    console.error(`Unable to parse row to term filter ${row.id}`);
+    console.error(`Unable to parse term filter '${row.conjunctivefilter_json}' for blacklist item ${row.id}`);
     filteredTerms = [];
   }
 

@@ -38,7 +38,7 @@ function cassandraRowToSite(row) {
   try {
     geofence = row.geofence_json ? JSON.parse(row.geofence_json) : [];
   } catch (err) {
-    console.error(`Unable to parse geofence for site: ${err}`);
+    console.error(`Unable to parse geofence '${row.geofence_json}' for site: ${err}`);
     geofence = [];
   }
 
@@ -46,7 +46,7 @@ function cassandraRowToSite(row) {
   try {
     languages = row.languages_json ? JSON.parse(row.languages_json) : [];
   } catch (err) {
-    console.error(`Unable to parse languages for site: ${err}`);
+    console.error(`Unable to parse languages '${row.languages_json}' for site: ${err}`);
     languages = [];
   }
 
@@ -75,7 +75,7 @@ function transformWatchlist(item, translatedlanguage) {
   try {
     translations = item.translations_json ? JSON.parse(item.translations_json) : {};
   } catch (err) {
-    console.error(`Unable to parse translations for watchlist item ${item.topicid}`);
+    console.error(`Unable to parse translations '${item.translations_json}' for watchlist item ${item.topicid}`);
     translations = {};
   }
 

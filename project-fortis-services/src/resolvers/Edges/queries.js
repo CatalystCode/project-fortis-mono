@@ -27,7 +27,7 @@ function getPlaceBlacklist() {
           try {
             blacklistedPlaces = JSON.parse(row.conjunctivefilter_json);
           } catch (error) {
-            console.warn(`Got unparsable blacklist conjunctivefilter at entry ${row.id}`);
+            console.warn(`Got unparsable blacklist conjunctivefilter '${row.conjunctivefilter_json}' at entry ${row.id}`);
             return;
           }
 
