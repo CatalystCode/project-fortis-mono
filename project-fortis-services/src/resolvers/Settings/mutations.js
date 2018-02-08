@@ -396,7 +396,7 @@ function removeStreams(args, res) { // eslint-disable-line no-unused-vars
     const mutations = streams.map(stream => ({
       query: `
       DELETE
-      FROM fortis.streams
+      FROM settings.streams
       WHERE pipelinekey = ? and streamid = ?`,
       params: [stream.pipelineKey, stream.streamId]
     }));
