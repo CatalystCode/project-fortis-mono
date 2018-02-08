@@ -107,14 +107,25 @@ function trustedSources(args, res) { // eslint-disable-line no-unused-vars
 }
 
 function cassandraRowToStream(row) {
-  if (row.enabled == null) row.enabled = false;
+  if (row.enabled == null) {
+    row.enabled = false;
+  }
+
+  let params;
+  try {
+    params = params ? JSON.parse(params) : {};
+  } catch (err) {
+    console.error(`Unable to parse params for stream ${row.streamid}`);
+    params = {};
+  }
+
   return {
     streamId: row.streamid,
     pipelineKey: row.pipelinekey,
     pipelineLabel: row.pipelinelabel,
     pipelineIcon: row.pipelineicon,
     streamFactory: row.streamfactory,
-    params: paramsToParamsEntries(row.params),
+    params: paramsToParamsEntries(params),
     enabled: row.enabled
   };
 }
@@ -145,16 +156,24 @@ function paramsToParamsEntries(params) {
 }
 
 function cassandraRowToTermFilter(row) {
+  let filteredTerms;
+  try {
+    filteredTerms = row.conjunctivefilter_json ? JSON.parse(row.conjunctivefilter_json) : [];
+  } catch (err) {
+    console.error(`Unable to parse row to term filter ${row.id}`);
+    filteredTerms = [];
+  }
+
   return {
     id: row.id,
     isLocation: !!row.islocation,
-    filteredTerms: row.conjunctivefilter
+    filteredTerms
   };
 }
 
 function termBlacklist(args, res) { // eslint-disable-line no-unused-vars
   return new Promise((resolve, reject) => {
-    const blacklistQuery = 'SELECT id, conjunctivefilter, islocation FROM settings.blacklist';
+    const blacklistQuery = 'SELECT id, conjunctivefilter_json, islocation FROM settings.blacklist';
     cassandraConnector.executeQuery(blacklistQuery, [])
       .then(rows => {
         const filters = rows.map(cassandraRowToTermFilter);

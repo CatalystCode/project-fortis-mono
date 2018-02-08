@@ -5,6 +5,7 @@ import com.datastax.spark.connector._
 import com.microsoft.partnercatalyst.fortis.spark.dto.{BlacklistedItem, SiteSettings}
 import com.microsoft.partnercatalyst.fortis.spark.logging.Loggable
 import com.microsoft.partnercatalyst.fortis.spark.sources.streamprovider.ConnectorConfig
+import net.liftweb.json
 import org.apache.spark.SparkContext
 
 import scala.compat.java8.FunctionConverters._
@@ -23,15 +24,21 @@ class CassandraConfigurationManager extends ConfigurationManager with Serializab
         .map(row => row.getString("externalsourceid")).collect()
     }
 
-    val pipelineConfigRows = sparkContext.cassandraTable[CassandraSchema.Table.Stream](CassandraSchema.KeyspaceName,
-      CassandraSchema.Table.StreamsName).where("pipelinekey = ?", pipeline).collect().filter(row=>row.enabled.getOrElse(true))
+    val pipelineConfigRows = sparkContext
+      .cassandraTable[CassandraSchema.Table.Stream](CassandraSchema.KeyspaceName, CassandraSchema.Table.StreamsName)
+      .where("pipelinekey = ?", pipeline)
+      .collect()
+      .filter(row => row.enabled.getOrElse(true))
 
     pipelineConfigRows.map(stream => {
+      implicit val formats = json.DefaultFormats
+
       val trustedSources = connectorToTrustedSources.computeIfAbsent(pipeline, (fetchTrustedSources _).asJava)
+      val params = json.parse(stream.params_json).extract[Map[String, String]]
 
       ConnectorConfig(
         stream.streamfactory,
-        stream.params +
+        params +
           (
             "trustedSources" -> trustedSources,
             "streamId" -> stream.streamid
@@ -55,10 +62,13 @@ class CassandraConfigurationManager extends ConfigurationManager with Serializab
   }
 
   override def fetchWatchlist(sparkContext: SparkContext): Map[String, List[String]] = {
+    implicit val formats = json.DefaultFormats
+
     val langToTermPairRdd = sparkContext.cassandraTable(CassandraSchema.KeyspaceName, CassandraSchema.Table.WatchlistName)
-      .select("lang_code", "topic", "translations")
+      .select("lang_code", "topic", "translations_json")
       .flatMap(row =>
-        (row.getString("lang_code"), row.getString("topic")) :: row.getMap[String, String]("translations").toList
+        (row.getString("lang_code"),
+         row.getString("topic")) :: json.parse(row.getString("translations_json")).extract[Map[String, String]].toList
       )
       .mapValues(List(_))
       .reduceByKey(_ ::: _)
@@ -67,9 +77,13 @@ class CassandraConfigurationManager extends ConfigurationManager with Serializab
   }
 
   override def fetchBlacklist(sparkContext: SparkContext): Seq[BlacklistedItem] = {
+    implicit val formats = json.DefaultFormats
+
     val blacklistRdd = sparkContext.cassandraTable(CassandraSchema.KeyspaceName, CassandraSchema.Table.BlacklistName)
-      .select("conjunctivefilter", "islocation")
-      .map(row => BlacklistedItem(row.getList[String]("conjunctivefilter").toSet, row.getBooleanOption("islocation").getOrElse(false)))
+      .select("conjunctivefilter_json", "islocation")
+      .map(row => BlacklistedItem(
+        json.parse(row.getString("conjunctivefilter_json")).extract[List[String]].toSet,
+        row.getBooleanOption("islocation").getOrElse(false)))
 
     blacklistRdd.collect()
   }
