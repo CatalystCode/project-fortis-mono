@@ -62,14 +62,14 @@ class CassandraConfigurationManager extends ConfigurationManager with Serializab
   }
 
   override def fetchWatchlist(sparkContext: SparkContext): Map[String, List[String]] = {
-    implicit val formats = json.DefaultFormats
-
     val langToTermPairRdd = sparkContext.cassandraTable(CassandraSchema.KeyspaceName, CassandraSchema.Table.WatchlistName)
       .select("lang_code", "topic", "translations_json")
-      .flatMap(row =>
+      .flatMap(row => {
+        implicit val formats = json.DefaultFormats
+
         (row.getString("lang_code"),
          row.getString("topic")) :: json.parse(row.getString("translations_json")).extract[Map[String, String]].toList
-      )
+      })
       .mapValues(List(_))
       .reduceByKey(_ ::: _)
 
@@ -77,13 +77,15 @@ class CassandraConfigurationManager extends ConfigurationManager with Serializab
   }
 
   override def fetchBlacklist(sparkContext: SparkContext): Seq[BlacklistedItem] = {
-    implicit val formats = json.DefaultFormats
-
     val blacklistRdd = sparkContext.cassandraTable(CassandraSchema.KeyspaceName, CassandraSchema.Table.BlacklistName)
       .select("conjunctivefilter_json", "islocation")
-      .map(row => BlacklistedItem(
-        json.parse(row.getString("conjunctivefilter_json")).extract[List[String]].toSet,
-        row.getBooleanOption("islocation").getOrElse(false)))
+      .map(row => {
+        implicit val formats = json.DefaultFormats
+
+        BlacklistedItem(
+          json.parse(row.getString("conjunctivefilter_json")).extract[List[String]].toSet,
+          row.getBooleanOption("islocation").getOrElse(false))
+      })
 
     blacklistRdd.collect()
   }
