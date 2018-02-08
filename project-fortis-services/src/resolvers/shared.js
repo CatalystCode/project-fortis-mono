@@ -73,7 +73,7 @@ function cassandraRowToSite(row) {
 function transformWatchlist(item, translatedlanguage) {
   let translations;
   try {
-    translations = row.translations_json ? JSON.parse(row.translations_json) : {};
+    translations = item.translations_json ? JSON.parse(item.translations_json) : {};
   } catch (err) {
     console.error(`Unable to parse translations for watchlist item ${item.topicid}`);
     translations = {};
