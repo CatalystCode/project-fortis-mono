@@ -88,9 +88,7 @@ class StreamParamsButtonFormatter extends React.Component {
           <Glyphicon glyph="edit" /> Edit
         </Button>
         <Modal show={this.state.isShowDetailOn} onHide={this.handleHideDetails}>
-          <Modal.Header closeButton>
-            <Modal.Title>Parameters for {this.props.dependentValues.pipelineLabel}</Modal.Title>
-          </Modal.Header>
+          <Modal.Header closeButton />
           <Modal.Body>
             <DataGrid
               rowHeight={40}

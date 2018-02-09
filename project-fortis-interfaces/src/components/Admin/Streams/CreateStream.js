@@ -24,8 +24,10 @@ class CreateStream extends React.Component {
     const formatParamsForGraphqlSchema = () => {
       const paramEntries = [];
       forOwn(stream.params, (value, key) => {
-        paramEntries.push({ key, value });
+        paramEntries.push({ key, value: (typeof value === 'boolean' ? value.toString() : value) });
       });
+      if (paramEntries.filter(entry => entry.key === 'watchlistFilteringEnabled').length === 0) paramEntries.push({ key: "watchlistFilteringEnabled", value: "false" });
+      
       stream.params = paramEntries;
     }
 

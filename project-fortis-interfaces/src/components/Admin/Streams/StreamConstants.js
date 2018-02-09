@@ -313,7 +313,6 @@ const schema = {
                     'consumerSecret',
                     'accessToken',
                     'accessTokenSecret',
-                    'watchlistFilteringEnabled',
                     'userIds'
                   ]
                 }
