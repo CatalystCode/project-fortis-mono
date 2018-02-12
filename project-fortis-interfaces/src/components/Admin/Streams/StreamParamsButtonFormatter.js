@@ -4,6 +4,9 @@ import Glyphicon from 'react-bootstrap/lib/Glyphicon';
 import Button from 'react-bootstrap/lib/Button';
 import Modal from 'react-bootstrap/lib/Modal';
 import { getColumns } from '../shared';
+import isArray from 'lodash/isArray';
+import isBoolean from 'lodash/isBoolean';
+import isString from 'lodash/isString';
 
 class StreamParamsButtonFormatter extends React.Component {
   constructor(props) {
@@ -13,11 +16,6 @@ class StreamParamsButtonFormatter extends React.Component {
       isShowDetailOn: false,
       params: []
     };
-
-    this.getStream = this.getStream.bind(this);
-    this.handleShowDetails = this.handleShowDetails.bind(this);
-    this.handleHideDetails = this.handleHideDetails.bind(this);
-    this.handleSave = this.handleSave.bind(this);
   }
 
   handleSave = () => {
@@ -28,7 +26,7 @@ class StreamParamsButtonFormatter extends React.Component {
 
   prepareStreamsForSave = () => {
     let stream = this.getStream();
-    if (typeof this.state.params === 'string') {
+    if (isString(this.state.params)) {
       stream.params = JSON.parse(this.state.params);
     } else {
       stream.params = this.state.params;
@@ -40,7 +38,7 @@ class StreamParamsButtonFormatter extends React.Component {
   handleShowDetails = () => {
     const stream = this.getStream();
     let params = stream.params;
-    if (typeof stream.params === 'string') {
+    if (isString(stream.params)) {
       params = JSON.parse(stream.params);
     }
 
@@ -52,12 +50,12 @@ class StreamParamsButtonFormatter extends React.Component {
     });
   }
 
-  convertParamValuesToString = (params) => {
+  convertParamValuesToString = params => {
     params.forEach(param => {
-      if (typeof param.value === 'boolean') {
+      if (isBoolean(param.value)) {
         param.value = param.value.toString();
-      } else if (param.value.constructor === Array) {
-        param.value = param.value.join();
+      } else if (isArray(param.value)) {
+        param.value = param.value.join(',');
       }
     });
   }

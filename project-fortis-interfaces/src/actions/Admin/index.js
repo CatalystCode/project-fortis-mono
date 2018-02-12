@@ -5,16 +5,12 @@ import constants from '../constants';
 import differenceBy from 'lodash/differenceBy';
 import differenceWith from 'lodash/differenceWith';
 import some from 'lodash/some';
+import isArray from 'lodash/isArray';
 
 function getListAfterRemove(listBeforeRemove, itemsRemoved, keyBy) {
-  const customComparator = (a, b) => {
-    function isPropertyEqual(property) {
-      return a[property] === b[property];
-    }
-    return keyBy.every(isPropertyEqual);
-  }
+  const customComparator = (a, b) => keyBy.every(prop => a[prop] === b[prop]);
 
-  if (keyBy.constructor === Array) return differenceWith(listBeforeRemove, itemsRemoved, customComparator);
+  if (isArray(keyBy)) return differenceWith(listBeforeRemove, itemsRemoved, customComparator);
   else return differenceBy(listBeforeRemove, itemsRemoved, keyBy);
 }
 
@@ -24,8 +20,8 @@ function addIdsToUsersForGrid(users) {
 
 function prepareBlacklistForGrid(rows) {
   rows.forEach(row => {
-    if (row && row.filteredTerms && row.filteredTerms.constructor === Array) {
-      row.filteredTerms = row.filteredTerms.join();
+    if (row && row.filteredTerms && isArray(row.filteredTerms)) {
+      row.filteredTerms = row.filteredTerms.join(',');
     }
   });
 }

@@ -6,12 +6,11 @@ import StreamParamsButtonFormatter from './StreamParamsButtonFormatter';
 import StreamStatusButtonFormatter from './StreamStatusButtonFormatter';
 import { Card, CardTitle, CardText } from 'material-ui/Card';
 import Divider from 'material-ui/Divider';
+import isString from 'lodash/isString';
 
 class StreamEditor extends React.Component {
   constructor(props) {
     super(props);
-
-    this.remove = this.remove.bind(this);
 
     this.state = {
       streamToBeEdited: {}
@@ -39,7 +38,7 @@ class StreamEditor extends React.Component {
 
   prepareStreamsForSave = streams => {
     streams.forEach(stream => {
-      if (typeof stream.params === 'string') stream.params = JSON.parse(stream.params);
+      if (isString(stream.params)) stream.params = JSON.parse(stream.params);
     });
   }
 

@@ -4,38 +4,49 @@ import { Card, CardTitle, CardText } from 'material-ui/Card';
 import Divider from 'material-ui/Divider';
 import StreamConstants from './StreamConstants';
 import { guid } from './../../../utils/Utils';
-import forOwn from '../../../../node_modules/lodash/forOwn';
+import forOwn from 'lodash/forOwn';
+import isBoolean from 'lodash/isBoolean';
+import find from 'lodash/find';
 
 class CreateStream extends React.Component {
   constructor(props) {
     super(props);
 
-    this.save = this.save.bind(this);
-
     this.state = {
-      dropdownValue: StreamConstants.defaultStreamMap.bing
+      dropdownValue: StreamConstants.defaultStreamMap.Bing
     };
   }
 
   save = data => {
     const stream = data.formData.stream;
+    const streamType = stream.pipelineKey;
+
     const addGuidToStreamIfNotExist = () => { if (!stream.streamId || stream.streamId.length === 0) stream.streamId = guid(); }
-    
+
     const formatParamsForGraphqlSchema = () => {
       const paramEntries = [];
       forOwn(stream.params, (value, key) => {
-        paramEntries.push({ key, value: (typeof value === 'boolean' ? value.toString() : value) });
+        paramEntries.push({ key, value: (isBoolean(value) ? value.toString() : value) });
       });
-      if (paramEntries.filter(entry => entry.key === 'watchlistFilteringEnabled').length === 0) paramEntries.push({ key: "watchlistFilteringEnabled", value: "false" });
+      if (!find(paramEntries, {key: 'watchlistFilteringEnabled'})) paramEntries.push({ key: "watchlistFilteringEnabled", value: "false" });
       
       stream.params = paramEntries;
+    }
+
+    const setStreamValues = () => {
+      stream.pipelineLabel = StreamConstants.defaultStreamMap[streamType].pipelineKey;
+      stream.pipelineIcon = StreamConstants.defaultStreamMap[streamType].pipelineIcon;
+      stream.streamFactory = StreamConstants.defaultStreamMap[streamType].streamFactory;
+      stream.enabled = StreamConstants.defaultStreamMap[streamType].enabled;
     }
 
     const saveStream = () => this.props.flux.actions.ADMIN.save_stream([stream]);
 
     addGuidToStreamIfNotExist();
+    setStreamValues();
     formatParamsForGraphqlSchema();
     saveStream();
+
   }
 
   render() {
@@ -46,7 +57,7 @@ class CreateStream extends React.Component {
         <CardText style={{backgroundColor: '#fafafa'}}>
           <Form schema={StreamConstants.schema}
             uiSchema={StreamConstants.uiSchema}
-            liveValidate={true}
+            liveValidate
             showErrorList={false}
             onSubmit={this.save} />
         </CardText>

@@ -1,80 +1,80 @@
-import values from './../../../../node_modules/lodash/values';
+import values from 'lodash/values';
 
 const defaultStreamMap = {
-  bing: {
+  Bing: {
     pipelineKey: 'Bing',
     pipelineLabel: 'Bing',
     pipelineIcon: 'Bing Icon',
     streamFactory: 'Bing',
     enabled: true
   },
-  eventHub: {
+  EventHub: {
     pipelineKey: 'EventHub',
     pipelineLabel: 'EventHub',
     pipelineIcon: 'EventHub Icon',
     streamFactory: 'EventHub',
     enabled: true
   },
-  facebookComment: {
+  FacebookComment: {
     pipelineKey: 'FacebookComment',
     pipelineLabel: 'FacebookComment',
     pipelineIcon: 'Facebook Comment Icon',
     streamFactory: 'FacebookComment',
     enabled: true
   },
-  facebookPost: {
+  FacebookPost: {
     pipelineKey: 'FacebookPost',
     pipelineLabel: 'FacebookPost',
     pipelineIcon: 'Facebook Post Icon',
     streamFactory: 'FacebookPost',
     enabled: true
   },
-  html: {
+  HTML: {
     pipelineKey: 'HTML',
     pipelineLabel: 'HTML',
     pipelineIcon: 'HTML Icon',
     streamFactory: 'HTML',
     enabled: true
   },
-  instagramLocation: {
+  InstagramLocation: {
     pipelineKey: 'InstagramLocation',
     pipelineLabel: 'InstagramLocation',
     pipelineIcon: 'Instagram Location Icon',
     streamFactory: 'InstagramLocation',
     enabled: true
   },
-  instagramTag: {
+  InstagramTag: {
     pipelineKey: 'InstagramTag',
     pipelineLabel: 'InstagramTag',
     pipelineIcon: 'Instagram Tag Icon',
     streamFactory: 'InstagramTag',
     enabled: true
   },
-  rss: {
+  RSS: {
     pipelineKey: 'RSS',
     pipelineLabel: 'RSS',
     pipelineIcon: 'RSS Icon',
     streamFactory: 'RSS',
     enabled: true
   },
-  radio: {
+  Radio: {
     pipelineKey: 'Radio',
     pipelineLabel: 'Radio',
     pipelineIcon: 'Radio Icon',
     streamFactory: 'Radio',
     enabled: true
   },
-  reddit: {
+  Reddit: {
     pipelineKey: 'Reddit',
     pipelineLabel: 'Reddit',
     pipelineIcon: 'Reddit Icon',
     streamFactory: 'Reddit',
     enabled: true
   },
-  twitter: {
+  Twitter: {
     pipelineKey: 'Twitter',
     pipelineLabel: 'Twitter',
-    pipelineIcon: 'fa fa-twitter',
+    pipelineIcon: 'fa fa-Twitter',
     streamFactory: 'Twitter',
     enabled: true
   }
@@ -100,22 +100,22 @@ const schema = {
           title: 'Stream Type',
           type: 'string',
           enum: (values(defaultStreamMap).map(defaultStream => defaultStream.pipelineKey)),
-          default: defaultStreamMap.bing.pipelineKey
+          default: defaultStreamMap.Bing.pipelineKey
         },
         pipelineLabel: {
           type: 'string',
           enum: (values(defaultStreamMap).map(defaultStream => defaultStream.pipelineLabel)),
-          default: defaultStreamMap.bing.pipelineLabel
+          default: defaultStreamMap.Bing.pipelineLabel
         },
         pipelineIcon: {
           type: 'string',
           enum: (values(defaultStreamMap).map(defaultStream => defaultStream.pipelineIcon)),
-          default: defaultStreamMap.bing.pipelineIcon
+          default: defaultStreamMap.Bing.pipelineIcon
         },
         streamFactory: {
           type: 'string',
           enum: (values(defaultStreamMap).map(defaultStream => defaultStream.streamFactory)),
-          default: defaultStreamMap.bing.streamFactory
+          default: defaultStreamMap.Bing.streamFactory
         },
         enabled: {
           type: 'boolean',
@@ -137,19 +137,19 @@ const schema = {
                 },
                 pipelineLabel: {
                   type: 'string',
-                  default: defaultStreamMap.bing.pipelineLabel
+                  default: defaultStreamMap.Bing.pipelineLabel
                 },
                 pipelineIcon: {
                   type: 'string',
-                  default: defaultStreamMap.bing.pipelineIcon
+                  default: defaultStreamMap.Bing.pipelineIcon
                 },
                 streamFactory: {
                   type: 'string',
-                  default: defaultStreamMap.bing.streamFactory
+                  default: defaultStreamMap.Bing.streamFactory
                 },
                 enabled: {
                   type: 'boolean',
-                  default: defaultStreamMap.bing.enabled
+                  default: defaultStreamMap.Bing.enabled
                 },
                 params: {
                   title: 'Bing Stream Parameters',
@@ -190,19 +190,19 @@ const schema = {
                 },
                 pipelineLabel: {
                   type: 'string',
-                  default: defaultStreamMap.eventHub.pipelineLabel
+                  default: defaultStreamMap.EventHub.pipelineLabel
                 },
                 pipelineIcon: {
                   type: 'string',
-                  default: defaultStreamMap.eventHub.pipelineIcon
+                  default: defaultStreamMap.EventHub.pipelineIcon
                 },
                 streamFactory: {
                   type: 'string',
-                  default: defaultStreamMap.eventHub.streamFactory
+                  default: defaultStreamMap.EventHub.streamFactory
                 },
                 enabled: {
                   type: 'boolean',
-                  default: defaultStreamMap.eventHub.enabled
+                  default: defaultStreamMap.EventHub.enabled
                 },
                 params: {
                   title: 'Event Hub Stream Parameters',
@@ -258,19 +258,19 @@ const schema = {
                 },
                 pipelineLabel: {
                   type: 'string',
-                  default: defaultStreamMap.twitter.pipelineLabel
+                  default: defaultStreamMap.Twitter.pipelineLabel
                 },
                 pipelineIcon: {
                   type: 'string',
-                  default: defaultStreamMap.twitter.pipelineIcon
+                  default: defaultStreamMap.Twitter.pipelineIcon
                 },
                 streamFactory: {
                   type: 'string',
-                  default: defaultStreamMap.twitter.streamFactory
+                  default: defaultStreamMap.Twitter.streamFactory
                 },
                 enabled: {
                   type: 'boolean',
-                  default: defaultStreamMap.twitter.enabled
+                  default: defaultStreamMap.Twitter.enabled
                 },
                 params: {
                   title: 'Twitter Stream Parameters',
