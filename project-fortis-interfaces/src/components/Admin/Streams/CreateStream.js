@@ -28,7 +28,9 @@ class CreateStream extends React.Component {
       forOwn(stream.params, (value, key) => {
         paramEntries.push({ key, value: (isBoolean(value) ? value.toString() : value) });
       });
-      if (!find(paramEntries, {key: 'watchlistFilteringEnabled'})) paramEntries.push({ key: "watchlistFilteringEnabled", value: "false" });
+      if (streamType === StreamConstants.defaultStreamMap.Twitter.pipelineKey && !find(paramEntries, {key: 'watchlistFilteringEnabled'})) {
+        paramEntries.push({ key: "watchlistFilteringEnabled", value: "false" });
+      }
       
       stream.params = paramEntries;
     }

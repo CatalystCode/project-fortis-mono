@@ -6,77 +6,88 @@ const defaultStreamMap = {
     pipelineLabel: 'Bing',
     pipelineIcon: 'Bing Icon',
     streamFactory: 'Bing',
-    enabled: true
+    enabled: true,
+    shownToUser: false
   },
   EventHub: {
     pipelineKey: 'EventHub',
     pipelineLabel: 'EventHub',
     pipelineIcon: 'EventHub Icon',
     streamFactory: 'EventHub',
-    enabled: true
+    enabled: true,
+    shownToUser: false
   },
   FacebookComment: {
     pipelineKey: 'FacebookComment',
     pipelineLabel: 'FacebookComment',
     pipelineIcon: 'Facebook Comment Icon',
     streamFactory: 'FacebookComment',
-    enabled: true
+    enabled: true,
+    shownToUser: false
   },
   FacebookPost: {
     pipelineKey: 'FacebookPost',
     pipelineLabel: 'FacebookPost',
     pipelineIcon: 'Facebook Post Icon',
     streamFactory: 'FacebookPost',
-    enabled: true
+    enabled: true,
+    shownToUser: false
   },
   HTML: {
     pipelineKey: 'HTML',
     pipelineLabel: 'HTML',
     pipelineIcon: 'HTML Icon',
     streamFactory: 'HTML',
-    enabled: true
+    enabled: true,
+    shownToUser: false
   },
   InstagramLocation: {
     pipelineKey: 'InstagramLocation',
     pipelineLabel: 'InstagramLocation',
     pipelineIcon: 'Instagram Location Icon',
     streamFactory: 'InstagramLocation',
-    enabled: true
+    enabled: true,
+    shownToUser: false
   },
   InstagramTag: {
     pipelineKey: 'InstagramTag',
     pipelineLabel: 'InstagramTag',
     pipelineIcon: 'Instagram Tag Icon',
     streamFactory: 'InstagramTag',
-    enabled: true
+    enabled: true,
+    shownToUser: false
   },
   RSS: {
     pipelineKey: 'RSS',
     pipelineLabel: 'RSS',
     pipelineIcon: 'RSS Icon',
     streamFactory: 'RSS',
-    enabled: true
+    enabled: true,
+    shownToUser: true
   },
   Radio: {
     pipelineKey: 'Radio',
     pipelineLabel: 'Radio',
     pipelineIcon: 'Radio Icon',
     streamFactory: 'Radio',
-    enabled: true
+    enabled: true,
+    shownToUser: false
   },
   Reddit: {
     pipelineKey: 'Reddit',
     pipelineLabel: 'Reddit',
     pipelineIcon: 'Reddit Icon',
     streamFactory: 'Reddit',
-    enabled: true
+    enabled: true,
+    shownToUser: false
   },
   Twitter: {
     pipelineKey: 'Twitter',
     pipelineLabel: 'Twitter',
     pipelineIcon: 'fa fa-Twitter',
     streamFactory: 'Twitter',
-    enabled: true
+    enabled: true,
+    shownToUser: true
   }
 };
 
@@ -99,23 +110,23 @@ const schema = {
         pipelineKey: {
           title: 'Stream Type',
           type: 'string',
-          enum: (values(defaultStreamMap).map(defaultStream => defaultStream.pipelineKey)),
-          default: defaultStreamMap.Bing.pipelineKey
+          enum: (values(defaultStreamMap).filter(defaultStream => defaultStream.shownToUser).map(defaultStream => defaultStream.pipelineKey)),
+          default: defaultStreamMap.RSS.pipelineKey
         },
         pipelineLabel: {
           type: 'string',
-          enum: (values(defaultStreamMap).map(defaultStream => defaultStream.pipelineLabel)),
-          default: defaultStreamMap.Bing.pipelineLabel
+          enum: (values(defaultStreamMap).filter(defaultStream => defaultStream.shownToUser).map(defaultStream => defaultStream.pipelineLabel)),
+          default: defaultStreamMap.RSS.pipelineLabel
         },
         pipelineIcon: {
           type: 'string',
-          enum: (values(defaultStreamMap).map(defaultStream => defaultStream.pipelineIcon)),
-          default: defaultStreamMap.Bing.pipelineIcon
+          enum: (values(defaultStreamMap).filter(defaultStream => defaultStream.shownToUser).map(defaultStream => defaultStream.pipelineIcon)),
+          default: defaultStreamMap.RSS.pipelineIcon
         },
         streamFactory: {
           type: 'string',
-          enum: (values(defaultStreamMap).map(defaultStream => defaultStream.streamFactory)),
-          default: defaultStreamMap.Bing.streamFactory
+          enum: (values(defaultStreamMap).filter(defaultStream => defaultStream.shownToUser).map(defaultStream => defaultStream.streamFactory)),
+          default: defaultStreamMap.RSS.streamFactory
         },
         enabled: {
           type: 'boolean',
@@ -128,6 +139,7 @@ const schema = {
       dependencies: {
         pipelineKey: {
           oneOf: [
+            /*
             {
               properties: {
                 pipelineKey: {
@@ -246,6 +258,53 @@ const schema = {
                     'partitionCount',
                     'consumerGroup'
                   ]
+                }
+              },
+            },
+            */
+            {
+              properties: {
+                pipelineKey: {
+                  enum: [
+                    'RSS'
+                  ]
+                },
+                pipelineLabel: {
+                  type: 'string',
+                  default: defaultStreamMap.RSS.pipelineLabel
+                },
+                pipelineIcon: {
+                  type: 'string',
+                  default: defaultStreamMap.RSS.pipelineIcon
+                },
+                streamFactory: {
+                  type: 'string',
+                  default: defaultStreamMap.RSS.streamFactory
+                },
+                enabled: {
+                  type: 'boolean',
+                  default: defaultStreamMap.RSS.enabled
+                },
+                params: {
+                  title: 'RSS Stream Parameters',
+                  type: 'object',
+                  properties: {
+                    connectionTimeout: {
+                      title: 'Connection Timeout (seconds)',
+                      type: 'number',
+                      default: 3000
+                    },
+                    readTimeout: {
+                      title: 'Read Timeout (seconds)',
+                      type: 'number',
+                      default: 9000
+                    },
+                    pollingPeriod: {
+                      title: 'Polling Period (seconds)',
+                      type: 'number',
+                      default: 3600
+                    }
+                  }
                 }
               },
             },
