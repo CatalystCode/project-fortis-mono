@@ -75,9 +75,13 @@ export default class HeatMap extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     const { placeid, defaultZoom } = this.state;
+    const { targetBbox } = this.props;
 
     if (hasChanged(this.props, nextProps) && nextProps.selectedplace.placeid && placeid !== nextProps.selectedplace.placeid) {
       this.moveMapToNewLocation(nextProps, defaultZoom);
+    }
+    if (hasChanged(this.props, nextProps) && nextProps.bbox && JSON.stringify(nextProps.bbox) === JSON.stringify(targetBbox)) {
+      this.moveMapToBoundingBox(targetBbox);
     }
   }
 
@@ -85,6 +89,12 @@ export default class HeatMap extends React.Component {
     const { selectedplace } = props;
     this.refs.map.leafletElement.setView(selectedplace.placecentroid, zoom);
     this.setState({ placeid: selectedplace.placeid });
+  }
+
+  moveMapToBoundingBox(bbox) {
+    const bounds = bbox.length && bbox.length === 4 ? [[bbox[1], bbox[0]], [bbox[3], bbox[2]]] : [];
+    this.refs.map.leafletElement.fitBounds(bounds);
+    this.setState({ bounds: bounds });
   }
 
   changeMapBoundsWithTile(tileid){
