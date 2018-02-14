@@ -7,9 +7,20 @@ import com.microsoft.partnercatalyst.fortis.spark.sinks.cassandra.CassandraConju
 import com.microsoft.partnercatalyst.fortis.spark.sinks.cassandra.dto.{ConjunctiveTopic, Event}
 import org.apache.spark.rdd.RDD
 
-class ConjunctiveTopicsOffineAggregator(configurationManager: ConfigurationManager) extends OfflineAggregator[ConjunctiveTopic] {
+class ConjunctiveTopicsOffineAggregator(configurationManager: ConfigurationManager, keyspace: String) extends (RDD[Event] => Unit) {
+  override def apply(events: RDD[Event]): Unit = {
+    val topics = aggregate(events).cache()
+    topics.count() match {
+      case 0 => return
+      case _ =>
+        implicit val rowWriter: SqlRowWriter.Factory.type = SqlRowWriter.Factory
+        topics.saveToCassandra(keyspace, "conjunctivetopics")
+    }
 
-  override def aggregate(events: RDD[Event]): RDD[ConjunctiveTopic] = {
+    topics.unpersist(blocking = true)
+  }
+
+  private[aggregators] def aggregate(events: RDD[Event]): RDD[ConjunctiveTopic] = {
     val siteSettings = configurationManager.fetchSiteSettings(events.sparkContext)
     val conjunctiveTopics = events.flatMap(CassandraConjunctiveTopics(_, siteSettings.defaultzoom))
 
@@ -22,17 +33,4 @@ class ConjunctiveTopicsOffineAggregator(configurationManager: ConfigurationManag
       a.copy(mentioncount = a.mentioncount+b.mentioncount)
     }).values
   }
-
-  override def aggregateAndSave(events: RDD[Event], keyspace: String): Unit = {
-    val topics = aggregate(events).cache()
-    topics.count() match {
-      case 0 => return
-      case _ =>
-        implicit val rowWriter: SqlRowWriter.Factory.type = SqlRowWriter.Factory
-        topics.saveToCassandra(keyspace, "conjunctivetopics")
-    }
-
-    topics.unpersist(blocking = true)
-  }
-
 }

@@ -8,99 +8,22 @@ CREATE KEYSPACE fortis WITH replication = {
 // * Down migration
 // *****************************************************************************
 
-DROP MATERIALIZED VIEW IF EXISTS fortis.eventbatches;
-DROP MATERIALIZED VIEW IF EXISTS fortis.popularsources;
-DROP MATERIALIZED VIEW IF EXISTS fortis.populartopics;
-DROP MATERIALIZED VIEW IF EXISTS fortis.eventplacesbysource;
-
 DROP TABLE IF EXISTS fortis.conjunctivetopics;
 DROP TABLE IF EXISTS fortis.computedtiles;
 DROP TABLE IF EXISTS fortis.heatmap;
+DROP TABLE IF EXISTS fortis.popularsources;
+DROP TABLE IF EXISTS fortis.populartopics;
 DROP TABLE IF EXISTS fortis.popularplaces;
-DROP TABLE IF EXISTS fortis.eventplaces;
+DROP TABLE IF EXISTS fortis.eventplacesbysource;
 DROP TABLE IF EXISTS fortis.events;
 DROP TABLE IF EXISTS fortis.computedtrends;
+DROP TABLE IF EXISTS fortis.eventplaces;
+DROP TABLE IF EXISTS fortis.eventsbypipeline;
+
 
 // *****************************************************************************
 // * Data tables
 // *****************************************************************************
-
-CREATE TABLE fortis.computedtiles (
-    perioddate timestamp,
-    periodtype text,
-    pipelinekey text,
-    tilez int,
-    tileid text,
-    externalsourceid text,
-    mentioncount bigint,
-    avgsentimentnumerator bigint,
-    conjunctiontopic1 text,
-    conjunctiontopic2 text,
-    conjunctiontopic3 text,
-    PRIMARY KEY ((periodtype, conjunctiontopic1, conjunctiontopic2, conjunctiontopic3, tilez, pipelinekey, externalsourceid, tileid), perioddate)
-);
-
-CREATE TABLE fortis.heatmap (
-    perioddate timestamp,
-    periodtype text,
-    pipelinekey text,
-    tilez int,
-    tileid text,
-    heatmaptileid text,
-    externalsourceid text,
-    mentioncount counter,
-    avgsentimentnumerator counter,
-    conjunctiontopic1 text,
-    conjunctiontopic2 text,
-    conjunctiontopic3 text,
-    PRIMARY KEY ((periodtype, conjunctiontopic1, conjunctiontopic2, conjunctiontopic3, tilez, pipelinekey, externalsourceid, tileid), perioddate, heatmaptileid)
-);
-
-CREATE TABLE fortis.popularplaces (
-    perioddate timestamp,
-    periodtype text,
-    pipelinekey text,
-    externalsourceid text,
-    placeid text,
-    tilez int,
-    tileid text,
-    conjunctiontopic1 text,
-    conjunctiontopic2 text,
-    conjunctiontopic3 text,
-    mentioncount counter,
-    avgsentimentnumerator counter,
-    PRIMARY KEY ((periodtype, pipelinekey, externalsourceid, conjunctiontopic1, conjunctiontopic2, conjunctiontopic3, tilez, tileid), perioddate, placeid)
-);
-
-CREATE TABLE fortis.conjunctivetopics (
-    perioddate timestamp,
-    periodtype text,
-    pipelinekey text,
-    tilez int,
-    tileid text,
-    externalsourceid text,
-    topic text,
-    conjunctivetopic text,
-    mentioncount counter,
-    PRIMARY KEY ((periodtype, pipelinekey, externalsourceid, tilez, topic, tileid), perioddate, conjunctivetopic)
-);
-
-CREATE TABLE fortis.eventplaces(
-    eventid text,
-    conjunctiontopic1 text,
-    conjunctiontopic2 text,
-    conjunctiontopic3 text,
-    tileid text,
-    tilez int,
-    centroidlat double,
-    centroidlon double,
-    placeid text,
-    insertiontime timestamp,
-    eventtime timestamp,
-    pipelinekey text,
-    externalsourceid text,
-    PRIMARY KEY ((conjunctiontopic1, conjunctiontopic2, conjunctiontopic3, pipelinekey, tilez, tileid), eventtime, eventid, placeid)
-) WITH CLUSTERING ORDER BY (eventtime DESC);
 
 CREATE TABLE fortis.events(
     eventid text,
@@ -120,83 +43,153 @@ CREATE TABLE fortis.events(
     PRIMARY KEY (eventid)
 );
 
+CREATE TABLE fortis.popularsources (
+    pipelinekey text,
+    conjunctiontopic1 text,
+    conjunctiontopic2 text,
+    conjunctiontopic3 text,
+    tilez int,
+    tileid text,
+    periodtype text,
+    perioddate timestamp,
+    externalsourceid text,
+    mentioncount counter,
+    avgsentimentnumerator counter,
+    PRIMARY KEY ((pipelinekey, conjunctiontopic1, conjunctiontopic2, conjunctiontopic3, tilez, tileid, periodtype), perioddate, externalsourceid)
+) WITH CLUSTERING ORDER BY (perioddate DESC);
+
+CREATE TABLE fortis.conjunctivetopics (
+    perioddate timestamp,
+    periodtype text,
+    pipelinekey text,
+    tilez int,
+    tileid text,
+    externalsourceid text,
+    topic text,
+    conjunctivetopic text,
+    mentioncount counter,
+    PRIMARY KEY ((periodtype, pipelinekey, externalsourceid, tilez, topic, tileid), perioddate, conjunctivetopic)
+);
+
+CREATE TABLE fortis.eventplaces(
+    pipelinekey text,
+    conjunctiontopic1 text,
+    conjunctiontopic2 text,
+    conjunctiontopic3 text,
+    tilez int,
+    tileid text,
+    externalsourceid text, // TODO: should this be part of the Primary Key?
+    eventtime timestamp,
+    eventid text,
+    placeid text,
+    centroidlat double,
+    centroidlon double,
+    insertiontime timestamp,
+    PRIMARY KEY ((pipelinekey, conjunctiontopic1, conjunctiontopic2, conjunctiontopic3, tilez, tileid), eventtime, eventid, placeid)
+) WITH CLUSTERING ORDER BY (eventtime DESC);
+
+CREATE TABLE fortis.eventsbypipeline(
+    pipelinekey text,
+    conjunctiontopic1 text,
+    conjunctiontopic2 text,
+    conjunctiontopic3 text,
+    tilez int,
+    tileid text,
+    externalsourceid text, // TODO: should this be part of the Primary Key?
+    eventtime timestamp,
+    eventid text,
+    placeid text,
+    centroidlat double,
+    centroidlon double,
+    insertiontime timestamp,
+    PRIMARY KEY ((pipelinekey, conjunctiontopic1, conjunctiontopic2, conjunctiontopic3, tilez), eventtime, eventid, tileid, placeid)
+) WITH CLUSTERING ORDER BY (eventtime DESC);
+
 // *****************************************************************************
-// * Views
+// * Partition key: (pipelinekey, conjunctiontopic1, conjunctiontopic2, conjunctiontopic3, tilez, tileid, externalsourceid, periodtype)
+// *
+// * Spark partitions TileRow data once according to the above partition key and 
+// * performs writes to these tables without shuffling.
 // *****************************************************************************
 
-CREATE MATERIALIZED VIEW fortis.populartopics
-AS SELECT periodtype, conjunctiontopic1, conjunctiontopic2, conjunctiontopic3, externalsourceid, pipelinekey, tilez, 
-          tileid, perioddate, mentioncount, avgsentimentnumerator
-   FROM fortis.computedtiles
-   WHERE periodtype IS NOT NULL
-     AND conjunctiontopic1 IS NOT NULL
-     AND conjunctiontopic2 = ''
-     AND conjunctiontopic3 = ''
-     AND avgsentimentnumerator IS NOT NULL
-     AND mentioncount IS NOT NULL
-     AND externalsourceid IS NOT NULL
-     AND pipelinekey IS NOT NULL
-     AND tilez IS NOT NULL
-     AND tileid IS NOT NULL
-     AND perioddate IS NOT NULL
-PRIMARY KEY ((periodtype, externalsourceid, tilez, pipelinekey, tileid, conjunctiontopic1, conjunctiontopic2, conjunctiontopic3), perioddate, mentioncount)
-WITH CLUSTERING ORDER BY (perioddate DESC, mentioncount DESC);
+CREATE TABLE fortis.heatmap (
+    pipelinekey text,
+    conjunctiontopic1 text,
+    conjunctiontopic2 text,
+    conjunctiontopic3 text,
+    tilez int,
+    tileid text,
+    externalsourceid text,
+    periodtype text,
+    perioddate timestamp,
+    heatmaptileid text,
+    mentioncount counter,
+    avgsentimentnumerator counter,
+    PRIMARY KEY ((pipelinekey, conjunctiontopic1, conjunctiontopic2, conjunctiontopic3, tilez, tileid, externalsourceid, periodtype), perioddate, heatmaptileid)
+);
 
-CREATE MATERIALIZED VIEW fortis.eventplacesbysource
-AS SELECT eventid, pipelinekey, eventtime, centroidlat, centroidlon, placeid, conjunctiontopic1, 
-          conjunctiontopic2, conjunctiontopic3, externalsourceid, tileid, tilez
-   FROM fortis.eventplaces
-   WHERE eventid IS NOT NULL
-     AND pipelinekey IS NOT NULL
-     AND eventtime IS NOT NULL
-     AND tileid IS NOT NULL
-     AND tilez IS NOT NULL
-     AND placeid IS NOT NULL
-     AND externalsourceid IS NOT NULL
-     AND conjunctiontopic1 IS NOT NULL
-     AND conjunctiontopic2 IS NOT NULL
-     AND conjunctiontopic3 IS NOT NULL
-     AND centroidlat IS NOT NULL
-     AND centroidlon IS NOT NULL
-PRIMARY KEY ((conjunctiontopic1, conjunctiontopic2, conjunctiontopic3, pipelinekey, tilez, externalsourceid, tileid), eventtime, placeid, eventid);
+CREATE TABLE fortis.eventplacesbysource(
+    pipelinekey text,
+    conjunctiontopic1 text,
+    conjunctiontopic2 text,
+    conjunctiontopic3 text,
+    tilez int,
+    tileid text,
+    externalsourceid text,
+    periodtype text, // always set to day
+    eventtime timestamp,
+    eventid text,
+    placeid text,
+    centroidlat double,
+    centroidlon double,
+    insertiontime timestamp,
+    PRIMARY KEY ((pipelinekey, conjunctiontopic1, conjunctiontopic2, conjunctiontopic3, tilez, tileid, externalsourceid, periodtype), eventtime, eventid, placeid)
+) WITH CLUSTERING ORDER BY (eventtime DESC);
 
-// Allows for linking the batchid to saveToCassandra spark call so we can filter out dupes from the original rdd.
-CREATE MATERIALIZED VIEW fortis.eventbatches
-AS SELECT batchid, eventid
-   FROM fortis.events
-   WHERE batchid IS NOT NULL
-     AND eventid IS NOT NULL
-PRIMARY KEY (batchid, eventid);
+CREATE TABLE fortis.popularplaces (
+    pipelinekey text,
+    conjunctiontopic1 text,
+    conjunctiontopic2 text,
+    conjunctiontopic3 text,
+    tilez int,
+    tileid text,
+    externalsourceid text,
+    periodtype text,
+    perioddate timestamp,
+    placeid text,
+    mentioncount counter,
+    avgsentimentnumerator counter,
+    PRIMARY KEY ((pipelinekey, conjunctiontopic1, conjunctiontopic2, conjunctiontopic3, tilez, tileid, externalsourceid, periodtype), perioddate, placeid)
+);
 
-CREATE MATERIALIZED VIEW fortis.popularsources
-AS SELECT periodtype, conjunctiontopic1, conjunctiontopic2, conjunctiontopic3, tilez, externalsourceid, pipelinekey, 
-          tileid, perioddate, mentioncount, avgsentimentnumerator
-   FROM fortis.computedtiles
-   WHERE periodtype IS NOT NULL
-     AND conjunctiontopic1 IS NOT NULL
-     AND conjunctiontopic2 IS NOT NULL
-     AND conjunctiontopic3 IS NOT NULL
-     AND avgsentimentnumerator IS NOT NULL
-     AND mentioncount IS NOT NULL
-     AND externalsourceid IS NOT NULL
-     AND pipelinekey IS NOT NULL
-     AND tilez IS NOT NULL
-     AND tileid IS NOT NULL
-     AND perioddate IS NOT NULL
-PRIMARY KEY ((periodtype, conjunctiontopic1, conjunctiontopic2, conjunctiontopic3, tilez, pipelinekey, tileid), perioddate, mentioncount, externalsourceid)
-WITH CLUSTERING ORDER BY (perioddate DESC, mentioncount DESC);
+CREATE TABLE fortis.computedtiles (
+    pipelinekey text,
+    conjunctiontopic1 text,
+    conjunctiontopic2 text,
+    conjunctiontopic3 text,
+    tilez int,
+    tileid text,
+    externalsourceid text,
+    periodtype text,
+    perioddate timestamp,
+    mentioncount counter,
+    avgsentimentnumerator counter,
+    PRIMARY KEY ((pipelinekey, conjunctiontopic1, conjunctiontopic2, conjunctiontopic3, tilez, tileid, externalsourceid, periodtype), perioddate)
+);
 
-CREATE MATERIALIZED VIEW fortis.eventsbypipeline
-AS SELECT eventid, pipelinekey, eventtime,conjunctiontopic3,conjunctiontopic2,tilez,tileid,placeid,conjunctiontopic1
-   FROM fortis.eventplaces
-   WHERE eventid IS NOT NULL
-     AND pipelinekey IS NOT NULL
-     AND eventtime IS NOT NULL
-     AND conjunctiontopic1 IS NOT NULL
-     AND conjunctiontopic2 = ''
-     AND conjunctiontopic3 = ''
-     AND tilez = 15
-     AND tileid IS NOT NULL
-     AND placeid IS NOT NULL
-PRIMARY KEY ((pipelinekey, conjunctiontopic1, conjunctiontopic2, conjunctiontopic3, tilez), eventtime, eventid, tileid, placeid)
-WITH CLUSTERING ORDER BY (eventtime DESC);
+// topics 2 and 3 are always written as empty string. They're included to keep partition keys the same as related aggregations.
+CREATE TABLE fortis.populartopics(
+    pipelinekey text,
+    conjunctiontopic1 text,
+    conjunctiontopic2 text,
+    conjunctiontopic3 text,
+    tilez int,
+    tileid text,
+    externalsourceid text,
+    periodtype text,
+    perioddate timestamp,
+    mentioncount counter,
+    avgsentimentnumerator counter,
+    PRIMARY KEY ((pipelinekey, conjunctiontopic1, conjunctiontopic2, conjunctiontopic3, tilez, tileid, externalsourceid, periodtype), perioddate)
+) WITH CLUSTERING ORDER BY (perioddate DESC);
+

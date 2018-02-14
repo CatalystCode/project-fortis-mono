@@ -127,6 +127,7 @@ function byBbox(args, res) { // eslint-disable-line no-unused-vars
 
     if (args.externalsourceid) {
       tagsParams.push(args.externalsourceid);
+      tagsParams.push('day');
       tableName = 'eventplacesbysource';
     }
 
@@ -141,7 +142,7 @@ function byBbox(args, res) { // eslint-disable-line no-unused-vars
     AND tileid IN ?
     AND tilez = ?
     AND pipelinekey IN ?
-    ${args.externalsourceid ? ' AND externalsourceid = ?' : ''}
+    ${args.externalsourceid ? ' AND externalsourceid = ? AND periodtype = ?' : ''}
     `.trim();
 
     cassandraConnector.executeQueryWithPageState(tagsQuery, tagsParams, args.pageState, parseLimit(args.limit))

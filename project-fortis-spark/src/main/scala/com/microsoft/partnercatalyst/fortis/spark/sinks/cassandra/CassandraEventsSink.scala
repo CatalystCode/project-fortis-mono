@@ -12,7 +12,6 @@ import com.microsoft.partnercatalyst.fortis.spark.logging.FortisTelemetry.{get =
 import com.microsoft.partnercatalyst.fortis.spark.logging.Timer
 import com.microsoft.partnercatalyst.fortis.spark.sinks.cassandra.aggregators._
 import com.microsoft.partnercatalyst.fortis.spark.sinks.cassandra.dto._
-import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.streaming.dstream.DStream
@@ -22,16 +21,13 @@ import scala.util.{Failure, Success, Try}
 object CassandraEventsSink {
   private val KeyspaceName = "fortis"
   private val TableEvent = "events"
-  private val TableEventPlaces = "eventplaces"
-  private val TableEventBatches = "eventbatches"
 
   def apply(stream: DStream[FortisEvent], sparkSession: SparkSession, configurationManager: ConfigurationManager): Unit = {
     implicit lazy val connector: CassandraConnector = CassandraConnector(sparkSession.sparkContext)
 
-    val aggregators = Seq[OfflineAggregator[_]](
-      new ConjunctiveTopicsOffineAggregator(configurationManager),
-      new PopularPlacesOfflineAggregator(configurationManager),
-      new HeatmapOfflineAggregator(configurationManager)
+    val aggregators = Seq[(RDD[Event]) => Unit](
+      new ConjunctiveTopicsOffineAggregator(configurationManager, KeyspaceName),
+      new TileAggregator(configurationManager, KeyspaceName)
     )
 
     stream.map(event => event.copy(analysis = event.analysis.copy(
@@ -45,16 +41,12 @@ object CassandraEventsSink {
         if (!eventsRDD.isEmpty) {
           val batchId = UUID.randomUUID().toString
           val fortisEventsRDD = eventsRDD.map(CassandraEventSchema(_, batchId))
-          val fortisEventsRDDRepartitioned = repartitioned(sparkSession, fortisEventsRDD)
-
-          // Write events
-          writeFortisEvents(fortisEventsRDDRepartitioned)
 
           // Get events unique to this batch
-          val uniqueEvents = withoutDuplicates(fortisEventsRDDRepartitioned)
+          val uniqueEvents = withoutDuplicates(fortisEventsRDD)
 
-          // Write event places
-          writeEventPlaces(uniqueEvents, sparkSession.sparkContext)
+          // Write events
+          writeFortisEvents(uniqueEvents)
 
           // Add 2 additional copies of each event to support aggregation by "all" pipelines and sources
           val eventsExploded = uniqueEvents.flatMap(event=>{
@@ -66,11 +58,12 @@ object CassandraEventsSink {
           })
 
           // Perform aggregations and write results
-          aggregators.foreach(aggregator => writeAggregates(eventsExploded, aggregator))
+          Timer.time(Log.logDependency("sinks.cassandra", s"writeAggregates_all", _, _)) {
+            aggregators.foreach(aggregator => writeAggregates(eventsExploded, aggregator))
+          }
 
           eventsExploded.unpersist(blocking = true)
           uniqueEvents.unpersist(blocking = true)
-          fortisEventsRDDRepartitioned.unpersist(blocking = true)
           fortisEventsRDD.unpersist(blocking = true)
           eventsRDD.unpersist(blocking = true)
         }
@@ -89,37 +82,21 @@ object CassandraEventsSink {
     }
 
     def withoutDuplicates(events: RDD[Event]): RDD[Event] = {
-      val eventsRepartitioned = events.repartitionByCassandraReplica(KeyspaceName, TableEventBatches)
+      val eventsRepartitioned = events.repartitionByCassandraReplica(KeyspaceName, TableEvent)
 
-      eventsRepartitioned.joinWithCassandraTable(
+      // new events in batch = [batch] - [events table]
+      eventsRepartitioned.leftJoinWithCassandraTable(
         KeyspaceName,
-        TableEventBatches,
-        selectedColumns = SomeColumns("eventid", "batchid"),
-        joinColumns = SomeColumns("eventid", "batchid")
-      ).map(_._1).cache()
+        TableEvent
+      ).filter(_._2.isEmpty).map(_._1)
     }
 
-    def writeEventPlaces(events: RDD[Event], sparkContext: SparkContext): Unit = {
-      Try {
-        Timer.time(Log.logDependency("sinks.cassandra", s"write.$TableEventPlaces", _, _)) {
-          val defaultZoom = configurationManager.fetchSiteSettings(sparkContext).defaultzoom
-
-          val eventsWithSchema = events.flatMap(CassandraEventPlacesSchema(_, defaultZoom))
-          eventsWithSchema.saveToCassandra(KeyspaceName, TableEventPlaces)
-        }
-      }
-    }
-
-    def repartitioned(sparkSession: SparkSession, fortisEventsRDD: RDD[Event]) = {
-      fortisEventsRDD.repartition(2 * sparkSession.sparkContext.defaultParallelism).cache()
-    }
-
-    def writeAggregates(eventsExploded: RDD[Event], aggregator: OfflineAggregator[_]): Unit = {
+    def writeAggregates(eventsExploded: RDD[Event], aggregator: (RDD[Event] => Unit)): Unit = {
       val name = aggregator.getClass.getSimpleName
 
       Try {
-        Timer.time(Log.logDependency("sinks.cassandra", s"aggregateAndSave.$name", _, _)) {
-          aggregator.aggregateAndSave(eventsExploded, KeyspaceName)
+        Timer.time(Log.logDependency("sinks.cassandra", s"apply.$name", _, _)) {
+          aggregator(eventsExploded)
         }
       } match {
         case Failure(ex) => Log.logError(s"Failed performing offline aggregation $name", ex)
