@@ -9,11 +9,6 @@ import isBoolean from 'lodash/isBoolean';
 import find from 'lodash/find';
 import uniqBy from 'lodash/uniqBy';
 
-function filterErrorsAndMakeUniqueByProperty(errors) {
-  errors = errors.filter(error => error.message !== 'should match exactly one schema in oneOf' && error.message !== 'should be equal to one of the allowed values');
-  return uniqBy(errors, 'property');
-}
-
 class CreateStream extends React.Component {
   save = data => {
     const stream = data.formData.stream;
@@ -68,6 +63,11 @@ class CreateStream extends React.Component {
     saveStream();
   }
 
+  filterErrorsAndMakeUniqueByProperty = errors => {
+    errors = errors.filter(error => error.message !== 'should match exactly one schema in oneOf' && error.message !== 'should be equal to one of the allowed values');
+    return uniqBy(errors, 'property');
+  }
+
   render() {
     return (
       <Card>
@@ -77,7 +77,7 @@ class CreateStream extends React.Component {
           <Form schema={StreamConstants.schema}
             uiSchema={StreamConstants.uiSchema}
             liveValidate
-            transformErrors={filterErrorsAndMakeUniqueByProperty}
+            transformErrors={this.filterErrorsAndMakeUniqueByProperty}
             showErrorList={false}
             onSubmit={this.save} />
         </CardText>
