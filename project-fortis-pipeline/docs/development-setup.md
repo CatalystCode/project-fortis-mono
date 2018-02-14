@@ -113,6 +113,14 @@ Note that any changes to the React code in project-fortis-interfaces folder will
 be automatically detected and re-loaded so the re-build step above won't be
 necessary for changes to the frontend.
 
+## Cleaning
+Volumes (such as Cassandra table data) will stick around between rebuilds. To perform
+a clean (discarding table data etc.), use:
+
+```sh
+docker-compose down
+```
+
 ## Tips and tricks
 
 ### Accessing Cassandra
