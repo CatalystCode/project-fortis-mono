@@ -14,7 +14,7 @@ export default class HeatMap extends React.Component {
     super(props);
     const { defaultZoom, targetBbox, bbox } = props;
 
-    const bounds = bbox.length && bbox.length === 4 ? [[bbox[1], bbox[0]], [bbox[3], bbox[2]]] : [];
+    const bounds = this.getMapBounds(bbox);
     this.onViewportChanged = this.onViewportChanged.bind(this);
     this.updateBounds = this.asyncInvokeDashboardRefresh.bind(this);
     this.changeMapBoundsWithTile = this.changeMapBoundsWithTile.bind(this);
@@ -92,8 +92,12 @@ export default class HeatMap extends React.Component {
     this.setState({ placeid: selectedplace.placeid });
   }
 
+  getMapBounds(bbox) {
+    return bbox.length && bbox.length === 4 ? [[bbox[1], bbox[0]], [bbox[3], bbox[2]]] : [];
+  }
+
   moveMapToBoundingBox(bbox) {
-    const bounds = bbox.length && bbox.length === 4 ? [[bbox[1], bbox[0]], [bbox[3], bbox[2]]] : [];
+    const bounds = this.getMapBounds(bbox);
     this.refs.map.leafletElement.fitBounds(bounds);
     this.setState({ bounds: bounds });
   }
