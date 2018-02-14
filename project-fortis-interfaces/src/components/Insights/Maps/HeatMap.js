@@ -7,6 +7,7 @@ import { tileFromTileId } from 'geotile';
 import { hasChanged } from '../shared';
 import '../../../styles/Insights/HeatMap.css';
 import 'leaflet/dist/leaflet.css';
+import isEqual from 'lodash/isEqual';
 
 export default class HeatMap extends React.Component {
   constructor(props) {
@@ -80,7 +81,7 @@ export default class HeatMap extends React.Component {
     if (hasChanged(this.props, nextProps) && nextProps.selectedplace.placeid && placeid !== nextProps.selectedplace.placeid) {
       this.moveMapToNewLocation(nextProps, defaultZoom);
     }
-    if (hasChanged(this.props, nextProps) && nextProps.bbox && JSON.stringify(nextProps.bbox) === JSON.stringify(targetBbox)) {
+    if (hasChanged(this.props, nextProps) && nextProps.bbox && isEqual(nextProps.bbox, targetBbox)) {
       this.moveMapToBoundingBox(targetBbox);
     }
   }
