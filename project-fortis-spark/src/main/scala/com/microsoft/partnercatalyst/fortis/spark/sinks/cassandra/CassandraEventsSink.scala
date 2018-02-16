@@ -42,8 +42,14 @@ object CassandraEventsSink {
           val batchId = UUID.randomUUID().toString
           val fortisEventsRDD = eventsRDD.map(CassandraEventSchema(_, batchId))
 
-          // Get events unique to this batch
-          val uniqueEvents = withoutDuplicates(fortisEventsRDD)
+          // Get events unique to this batch.
+          // Note: caching is *required* for correct execution, since uniqueEvents is used after writing
+          // to the events table (without cache, the second use will re-run dedup post-write, and we'd end up with
+          // nothing).
+          //
+          // A partition failure between writing events and calculating eventsExploded will cause the cache to be
+          // skipped, in which case events in that batch will not be aggregated.
+          val uniqueEvents = withoutDuplicates(fortisEventsRDD).cache()
 
           // Write events
           writeFortisEvents(uniqueEvents)
@@ -55,7 +61,7 @@ object CassandraEventsSink {
               event.copy(externalsourceid = "all"),
               event.copy(pipelinekey = "all", externalsourceid = "all")
             )
-          })
+          }).cache()
 
           // Perform aggregations and write results
           Timer.time(Log.logDependency("sinks.cassandra", s"writeAggregates_all", _, _)) {
