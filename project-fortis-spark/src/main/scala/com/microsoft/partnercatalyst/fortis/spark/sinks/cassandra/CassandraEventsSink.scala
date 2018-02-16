@@ -17,17 +17,15 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.streaming.dstream.DStream
 
 import scala.util.{Failure, Success, Try}
+import com.microsoft.partnercatalyst.fortis.spark.sinks.cassandra.Constants._
 
 object CassandraEventsSink {
-  private val KeyspaceName = "fortis"
-  private val TableEvent = "events"
-
   def apply(stream: DStream[FortisEvent], sparkSession: SparkSession, configurationManager: ConfigurationManager): Unit = {
     implicit lazy val connector: CassandraConnector = CassandraConnector(sparkSession.sparkContext)
 
     val aggregators = Seq[(RDD[Event]) => Unit](
-      new ConjunctiveTopicsOffineAggregator(configurationManager, KeyspaceName),
-      new TileAggregator(configurationManager, KeyspaceName)
+      new ConjunctiveTopicsOffineAggregator(configurationManager),
+      new TileAggregator(configurationManager)
     )
 
     stream.map(event => event.copy(analysis = event.analysis.copy(
@@ -82,18 +80,19 @@ object CassandraEventsSink {
         consistencyLevel = ConsistencyLevel.ALL // Ensure write is consistent across all replicas
       )
 
-      Timer.time(Log.logDependency("sinks.cassandra", s"write.$TableEvent", _, _)) {
-        events.saveToCassandra(KeyspaceName, TableEvent, writeConf = conf)
+      Timer.time(Log.logDependency("sinks.cassandra", s"write.${Table.Events}", _, _)) {
+        events.saveToCassandra(KeyspaceName, Table.Events, writeConf = conf)
       }
     }
 
+    // TODO: push filter down to Cassandra to minimize read data volume
     def withoutDuplicates(events: RDD[Event]): RDD[Event] = {
-      val eventsRepartitioned = events.repartitionByCassandraReplica(KeyspaceName, TableEvent)
+      val eventsRepartitioned = events.repartitionByCassandraReplica(KeyspaceName, Table.Events)
 
-      // new events in batch = [batch] - [events table]
+      // [new events] = [batch] - [events table]
       eventsRepartitioned.leftJoinWithCassandraTable(
         KeyspaceName,
-        TableEvent
+        Table.Events
       ).filter(_._2.isEmpty).map(_._1)
     }
 

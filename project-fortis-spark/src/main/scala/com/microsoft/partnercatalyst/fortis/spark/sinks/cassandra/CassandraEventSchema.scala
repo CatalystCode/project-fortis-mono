@@ -8,6 +8,23 @@ import com.microsoft.partnercatalyst.fortis.spark.sinks.cassandra.dto._
 import com.microsoft.partnercatalyst.fortis.spark.transforms.locations.TileUtils.{DETAIL_ZOOM_DELTA, DoubleToLongConversionFactor}
 import com.microsoft.partnercatalyst.fortis.spark.transforms.locations._
 
+object Constants {
+  val KeyspaceName = "fortis"
+
+  object Table {
+    val ComputedTiles = "computedtiles"
+    val ConjunctiveTopics = "conjunctivetopics"
+    val Events = "events"
+    val EventPlaces = "eventplaces"
+    val EventPlacesByPipeline = "eventsbypipeline"
+    val EventPlacesBySource = "eventplacesbysource"
+    val HeatMap = "heatmap"
+    val PopularPlaces = "popularplaces"
+    val PopularSources = "popularsources"
+    val PopularTopics = "populartopics"
+  }
+}
+
 object CassandraEventSchema {
   def apply(item: FortisEvent, batchid: String): Event = {
     Event(

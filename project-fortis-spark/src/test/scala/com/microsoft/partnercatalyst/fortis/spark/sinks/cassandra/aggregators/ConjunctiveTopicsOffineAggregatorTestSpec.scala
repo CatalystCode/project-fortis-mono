@@ -25,7 +25,7 @@ class ConjunctiveTopicsOffineAggregatorTestSpec extends FlatSpec with BeforeAndA
 
   before {
     configurationManager = Mockito.mock(classOf[ConfigurationManager])
-    aggregator = new ConjunctiveTopicsOffineAggregator(configurationManager, "fortis")
+    aggregator = new ConjunctiveTopicsOffineAggregator(configurationManager)
     sc = new SparkContext(conf)
     siteSettings = new SiteSettings(
       sitename = "Fortis",

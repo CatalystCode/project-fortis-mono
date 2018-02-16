@@ -6,15 +6,16 @@ import com.microsoft.partnercatalyst.fortis.spark.dba.ConfigurationManager
 import com.microsoft.partnercatalyst.fortis.spark.sinks.cassandra.CassandraConjunctiveTopics
 import com.microsoft.partnercatalyst.fortis.spark.sinks.cassandra.dto.{ConjunctiveTopic, Event}
 import org.apache.spark.rdd.RDD
+import com.microsoft.partnercatalyst.fortis.spark.sinks.cassandra.Constants._
 
-class ConjunctiveTopicsOffineAggregator(configurationManager: ConfigurationManager, keyspace: String) extends (RDD[Event] => Unit) {
+class ConjunctiveTopicsOffineAggregator(configurationManager: ConfigurationManager) extends (RDD[Event] => Unit) {
   override def apply(events: RDD[Event]): Unit = {
     val topics = aggregate(events).cache()
     topics.count() match {
       case 0 => return
       case _ =>
         implicit val rowWriter: SqlRowWriter.Factory.type = SqlRowWriter.Factory
-        topics.saveToCassandra(keyspace, "conjunctivetopics")
+        topics.saveToCassandra(KeyspaceName, Table.ConjunctiveTopics)
     }
 
     topics.unpersist(blocking = true)
