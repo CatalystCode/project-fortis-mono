@@ -42,7 +42,7 @@ object CassandraEventsSink {
 
           // Get events unique to this batch.
           // Note: caching is *required* for correct execution, since uniqueEvents is used after writing
-          // to the events table (without cache, the second use will re-run dedup post-write, and we'd end up with
+          // to the events table (without cache, the second use would re-run dedup post-write, and we'd end up with
           // nothing).
           //
           // A partition failure between writing events and calculating eventsExploded will cause the cache to be
