@@ -43,6 +43,8 @@ complete.
 Once the deployment has finished, click on the `Manage your resources`
 (highlighted below).
 
+If you set up TLS, remember to do the [TLS post deployment steps](https://github.com/CatalystCode/project-fortis/blob/master/project-fortis-pipeline/docs/tls-setup.md#post-deployment-steps) and [AAD post deployment steps](https://github.com/CatalystCode/project-fortis/blob/master/project-fortis-pipeline/docs/aad-setup.md#post-deployment-steps) before viewing your site.
+
 ![Screenshot of ARM template after successful deployment with highlight of management link to access the newly created resource group](https://user-images.githubusercontent.com/1086421/33331326-4437a7fe-d42f-11e7-8b4a-19b968b4705b.png)
 
 Now click on the `Tags` tab in the Azure Portal (highlighted below) and find the
