@@ -146,7 +146,7 @@ export const AppPage = createReactClass({
     const {
       fromDate, toDate, datetimeSelection, timespanType, dataSource, maintopic,
       bbox, zoomLevel, conjunctivetopics, externalsourceid, selectedplace,
-      category
+      category, sharedLink
     } = dataStore;
     const includeCsv = false;
 
@@ -155,7 +155,7 @@ export const AppPage = createReactClass({
         fromDate, toDate, datetimeSelection, timespanType, dataSource, maintopic,
         bbox, zoomLevel, conjunctivetopics, externalsourceid, includeCsv, selectedplace, () => {
           this.props.router.push(category ? `/dashboard/${category}` : '/dashboard');
-        });
+        }, true);
     });
   },
 

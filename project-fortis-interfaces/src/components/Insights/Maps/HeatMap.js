@@ -16,7 +16,7 @@ export default class HeatMap extends React.Component {
 
     const bounds = this.getMapBounds(bbox);
     this.onViewportChanged = this.onViewportChanged.bind(this);
-    this.updateBounds = this.asyncInvokeDashboardRefresh.bind(this);
+    this.asyncInvokeDashboardRefresh = this.asyncInvokeDashboardRefresh.bind(this);
     this.changeMapBoundsWithTile = this.changeMapBoundsWithTile.bind(this);
     const maxbounds = targetBbox.length && targetBbox.length === 4 ? [[targetBbox[0], targetBbox[1]], [targetBbox[2], targetBbox[3]]] : [];
 
@@ -24,7 +24,9 @@ export default class HeatMap extends React.Component {
       bounds: bounds,
       placeid: "",
       defaultZoom: parseFloat(defaultZoom || 6),
-      maxbounds: maxbounds
+      maxbounds: maxbounds,
+      sharedLinkMapRepositions: false,
+      mapMovedByProps: false
     };
   }
 
@@ -33,7 +35,7 @@ export default class HeatMap extends React.Component {
       this.cancelQueuedProcess();
       this.refreshTimerId = setTimeout(this.asyncInvokeDashboardRefresh(viewport), constants.MAP.DEBOUNCE);
     }
-
+    this.setState({mapMovedByProps: false});
     this.ready = true;
   }
 
@@ -52,7 +54,7 @@ export default class HeatMap extends React.Component {
   }
 
   asyncInvokeDashboardRefresh(viewport) {
-    if (this.refs.map) {
+    if (this.refs.map && !this.state.mapMovedByProps) {
       const { dataSource, timespanType, termFilters, datetimeSelection, maintopic, externalsourceid,
         fromDate, toDate, selectedplace } = this.props;
       const bbox = this.getLeafletBbox();
@@ -75,10 +77,17 @@ export default class HeatMap extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { placeid, defaultZoom } = this.state;
+    const { placeid, defaultZoom, sharedLinkMapRepositions } = this.state;
     const { targetBbox } = this.props;
-
-    if (hasChanged(this.props, nextProps) && nextProps.selectedplace.placeid && placeid !== nextProps.selectedplace.placeid) {
+    const { sharedLink } = nextProps;
+    if (hasChanged(this.props, nextProps) && sharedLink && !this.state.sharedLinkMapRepositions) {
+      const firstBbox = nextProps.bbox.slice(0,2);
+      const secondBbox = nextProps.bbox.slice(2,4);
+      this.refs.map.leafletElement.fitBounds([firstBbox, secondBbox]);
+      this.setState({sharedLinkMapRepositions: true});
+      this.setState({mapMovedByProps: false});
+    }
+    else if (hasChanged(this.props, nextProps) && nextProps.selectedplace.placeid && placeid !== nextProps.selectedplace.placeid) {
       this.moveMapToNewLocation(nextProps, defaultZoom);
     }
     else if (hasChanged(this.props, nextProps) && nextProps.bbox && isEqual(nextProps.bbox, targetBbox)) {
