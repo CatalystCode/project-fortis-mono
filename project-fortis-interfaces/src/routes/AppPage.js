@@ -153,7 +153,7 @@ export const AppPage = createReactClass({
     this.getFlux().actions.DASHBOARD.initializeDashboard(category, () => {
       this.getFlux().actions.DASHBOARD.reloadVisualizationState(
         fromDate, toDate, datetimeSelection, timespanType, dataSource, maintopic,
-        bbox, zoomLevel, conjunctivetopics, externalsourceid, includeCsv, selectedplace, () => {
+        bbox, zoomLevel, conjunctivetopics, externalsourceid, includeCsv, selectedplace, sharedLink, () => {
           this.props.router.push(category ? `/dashboard/${category}` : '/dashboard');
         }, true);
     });

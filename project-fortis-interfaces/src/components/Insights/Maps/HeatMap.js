@@ -77,7 +77,7 @@ export default class HeatMap extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { placeid, defaultZoom, sharedLinkMapRepositions } = this.state;
+    const { placeid, defaultZoom } = this.state;
     const { targetBbox } = this.props;
     const { sharedLink } = nextProps;
     if (hasChanged(this.props, nextProps) && sharedLink && !this.state.sharedLinkMapRepositions) {
