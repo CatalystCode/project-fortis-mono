@@ -7,8 +7,12 @@ import org.apache.spark.rdd.RDD
 import com.datastax.spark.connector._
 import com.microsoft.partnercatalyst.fortis.spark.logging.{FortisTelemetry, Timer}
 import FortisTelemetry.{get => Log}
+import com.datastax.spark.connector.cql.CassandraConnector
+import com.datastax.spark.connector.writer.RowWriterFactory
 import com.microsoft.partnercatalyst.fortis.spark.sinks.cassandra.Constants._
 import com.microsoft.partnercatalyst.fortis.spark.sinks.cassandra.CassandraExtensions._
+
+import scala.reflect.ClassTag
 
 class TileAggregator(configurationManager: ConfigurationManager) extends (RDD[Event] => Unit) {
   val LogName = "sinks.cassandra.write"
@@ -19,42 +23,30 @@ class TileAggregator(configurationManager: ConfigurationManager) extends (RDD[Ev
     // Partition tile rows by partition key of heatmap table which is shared by most other tile aggregation tables
     // as well. This way, the results of all aggregations below will land on the same Cassandra nodes the they were
     // computed on in Spark.
-    val tileRows = toTileRows(events, defaultZoom).repartitionByCassandraReplica(KeyspaceName, Table.HeatMap).cache()
+    val tileRows = toTileRows(events, defaultZoom).repartitionByCassandraReplica(KeyspaceName, Table.HeatMap)
+      .keyBy(_.eventid).cache()
 
     Timer.time(Log.logDependency(LogName, Table.HeatMap, _, _)) {
-      tileRows.saveToCassandra(KeyspaceName, Table.HeatMap)
+      tileRows.values.saveToCassandra(KeyspaceName, Table.HeatMap)
     }
 
     Timer.time(Log.logDependency(LogName, s"${Table.EventPlaces},${Table.EventPlacesByPipeline},${Table.EventPlacesBySource}", _, _)) {
-      val eventPlaces = toEventPlaces(tileRows).cache()
-      eventPlaces.dedupAndSaveToCassandra(KeyspaceName, Table.EventPlacesBySource)
-      eventPlaces.dedupAndSaveToCassandra(KeyspaceName, Table.EventPlaces)
-      eventPlaces.dedupAndSaveToCassandra(KeyspaceName, Table.EventPlacesByPipeline)
+      val eventPlaces = toEventPlaces(tileRows.values).cache()
+      eventPlaces.saveToCassandra(KeyspaceName, Table.EventPlacesBySource)
+      eventPlaces.saveToCassandra(KeyspaceName, Table.EventPlaces)
+      eventPlaces.saveToCassandra(KeyspaceName, Table.EventPlacesByPipeline)
     }
 
-    Timer.time(Log.logDependency(LogName, Table.PopularPlaces, _, _)) {
-      tileRows.dedupAndSaveToCassandra(KeyspaceName, Table.PopularPlaces)
-    }
-
-    Timer.time(Log.logDependency(LogName, Table.ComputedTiles, _, _)) {
-      tileRows.dedupAndSaveToCassandra(KeyspaceName, Table.ComputedTiles)
-    }
-
-    Timer.time(Log.logDependency(LogName, Table.PopularSources, _, _)) {
-      // below writes can land on any partition
-      tileRows.dedupAndSaveToCassandra(KeyspaceName, Table.PopularSources)
-    }
-
-    Timer.time(Log.logDependency(LogName, Table.PopularTopics, _, _)) {
-      val popularTopics = toPopularTopics(tileRows)
-      popularTopics.dedupAndSaveToCassandra(KeyspaceName, Table.PopularTopics)
-    }
+    deDupAndSaveToCassandra(tileRows, Table.PopularPlaces)
+    deDupAndSaveToCassandra(tileRows, Table.ComputedTiles)
+    deDupAndSaveToCassandra(tileRows, Table.PopularSources)
+    deDupAndSaveToCassandra(toPopularTopics(tileRows), Table.PopularTopics)
 
     tileRows.unpersist(blocking = true)
   }
 
   private[aggregators] def toTileRows(events: RDD[Event], defaultZoom: Int): RDD[TileRow] = {
-    events.flatMap(TileRows(_, defaultZoom))
+    TileRows(events, defaultZoom)
   }
 
   private[aggregators] def toEventPlaces(tiles: RDD[TileRow]): RDD[TileRow] = {
@@ -68,7 +60,18 @@ class TileAggregator(configurationManager: ConfigurationManager) extends (RDD[Ev
     )
   }
 
-  private[aggregators] def toPopularTopics(tiles: RDD[TileRow]): RDD[TileRow] = {
-    tiles.filter(tile => tile.conjunctiontopic2 == "" && tile.conjunctiontopic3 == "")
+  private[aggregators] def toPopularTopics(tiles: RDD[(String, TileRow)]): RDD[(String, TileRow)] = {
+    tiles.filter { case (_, tile) => tile.conjunctiontopic2 == "" && tile.conjunctiontopic3 == "" }
+  }
+
+  private def deDupAndSaveToCassandra[K, V](rows: RDD[(K, V)], tableName: String)
+    (implicit connector: CassandraConnector = CassandraConnector(rows.sparkContext), rwf: RowWriterFactory[V],
+     kt: ClassTag[K], vt: ClassTag[V], ord: Ordering[K]): Unit =
+  {
+    val rowsUniqueByEvent = rows.deDupValuesByCassandraTable(KeyspaceName, tableName).values
+
+    Timer.time(Log.logDependency(LogName, tableName, _, _)) {
+      rowsUniqueByEvent.saveToCassandra(KeyspaceName, tableName)
+    }
   }
 }

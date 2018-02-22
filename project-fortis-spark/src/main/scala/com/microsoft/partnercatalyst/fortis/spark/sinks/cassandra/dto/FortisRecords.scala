@@ -45,6 +45,7 @@ case class TileRow(
 
 
 case class ConjunctiveTopic(
+  eventid: String,
   conjunctivetopic: String,
   externalsourceid: String,
   mentioncount: Long,

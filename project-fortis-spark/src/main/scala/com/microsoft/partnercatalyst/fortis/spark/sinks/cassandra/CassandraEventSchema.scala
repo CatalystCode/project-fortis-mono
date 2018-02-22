@@ -7,6 +7,7 @@ import com.microsoft.partnercatalyst.fortis.spark.dto.FortisEvent
 import com.microsoft.partnercatalyst.fortis.spark.sinks.cassandra.dto._
 import com.microsoft.partnercatalyst.fortis.spark.transforms.locations.TileUtils.{DETAIL_ZOOM_DELTA, DoubleToLongConversionFactor}
 import com.microsoft.partnercatalyst.fortis.spark.transforms.locations._
+import org.apache.spark.rdd.RDD
 
 object Constants {
   val KeyspaceName = "fortis"
@@ -60,60 +61,65 @@ object CassandraConjunctiveTopics {
       )))
   }
 
-  def apply(item: Event, minZoom: Int): Seq[ConjunctiveTopic] = {
-    val computedfeatures = Features.fromJson(item.computedfeatures_json)
-    val keywordPairs = flatMapKeywords(item)
+  def apply(eventRDD: RDD[Event], minZoom: Int): RDD[ConjunctiveTopic] = {
+    eventRDD.flatMap(item => {
+      val computedfeatures = Features.fromJson(item.computedfeatures_json)
+      val keywordPairs = flatMapKeywords(item)
 
-    val tiles = TileUtils.tile_seq_from_places(computedfeatures.places, minZoom)
+      val tiles = TileUtils.tile_seq_from_places(computedfeatures.places, minZoom)
 
-    for {
-      kwPair <- keywordPairs
-      tileid <- tiles
-      periodType <- Utils.getCassandraPeriodTypes
-    } yield ConjunctiveTopic(
-      topic = kwPair._1,
-      conjunctivetopic = kwPair._2,
-      externalsourceid = item.externalsourceid,
-      mentioncount = computedfeatures.mentions,
-      perioddate = Period(item.eventtime, periodType).startTime(),
-      periodtype = periodType.periodTypeName,
-      pipelinekey = item.pipelinekey,
-      tileid = tileid.tileId,
-      tilez = tileid.zoom
-    )
+      for {
+        kwPair <- keywordPairs
+        tileid <- tiles
+        periodType <- Utils.getCassandraPeriodTypes
+      } yield ConjunctiveTopic(
+        eventid = item.eventid,
+        topic = kwPair._1,
+        conjunctivetopic = kwPair._2,
+        externalsourceid = item.externalsourceid,
+        mentioncount = computedfeatures.mentions,
+        perioddate = Period(item.eventtime, periodType).startTime(),
+        periodtype = periodType.periodTypeName,
+        pipelinekey = item.pipelinekey,
+        tileid = tileid.tileId,
+        tilez = tileid.zoom
+      )
+    })
   }
 }
 
 object TileRows {
-  def apply(item: Event, minZoom: Int): Seq[TileRow] = {
-    val computedfeatures = Features.fromJson(item.computedfeatures_json)
+  def apply(eventRDD: RDD[Event], minZoom: Int): RDD[TileRow] = {
+    eventRDD.flatMap(item => {
+      val computedfeatures = Features.fromJson(item.computedfeatures_json)
 
-    for {
-      ct <- Utils.getConjunctiveTopics(Option(computedfeatures.keywords))
-      place <- computedfeatures.places
-      zoom <- TileUtils.maxZoom(minZoom) to minZoom by -1
-      tileId = TileUtils.tile_id_from_lat_long(place.centroidlat, place.centroidlon, zoom)
-      periodType <- Utils.getCassandraPeriodTypes
-    } yield TileRow(
-      eventtime = item.eventtime,
-      eventid = item.eventid,
-      placeid = place.placeid,
-      periodtype = periodType.periodTypeName,
-      pipelinekey = item.pipelinekey,
-      conjunctiontopic1 = ct._1,
-      conjunctiontopic2 = ct._2,
-      conjunctiontopic3 = ct._3,
-      tilez = tileId.zoom,
-      tileid = tileId.tileId,
-      perioddate = Period(item.eventtime, periodType).startTime(),
-      externalsourceid = item.externalsourceid,
-      heatmaptileid = TileUtils.tile_id_from_lat_long(place.centroidlat, place.centroidlon, zoom + DETAIL_ZOOM_DELTA).tileId,
-      centroidlat = place.centroidlat,
-      centroidlon = place.centroidlon,
-      mentioncount = computedfeatures.mentions,
-      avgsentimentnumerator = (computedfeatures.sentiment.neg_avg * DoubleToLongConversionFactor).toLong,
-      insertiontime = new Date().getTime
-    )
+      for {
+        ct <- Utils.getConjunctiveTopics(Option(computedfeatures.keywords))
+        place <- computedfeatures.places
+        zoom <- TileUtils.maxZoom(minZoom) to minZoom by -1
+        tileId = TileUtils.tile_id_from_lat_long(place.centroidlat, place.centroidlon, zoom)
+        periodType <- Utils.getCassandraPeriodTypes
+      } yield TileRow(
+        eventtime = item.eventtime,
+        eventid = item.eventid,
+        placeid = place.placeid,
+        periodtype = periodType.periodTypeName,
+        pipelinekey = item.pipelinekey,
+        conjunctiontopic1 = ct._1,
+        conjunctiontopic2 = ct._2,
+        conjunctiontopic3 = ct._3,
+        tilez = tileId.zoom,
+        tileid = tileId.tileId,
+        perioddate = Period(item.eventtime, periodType).startTime(),
+        externalsourceid = item.externalsourceid,
+        heatmaptileid = TileUtils.tile_id_from_lat_long(place.centroidlat, place.centroidlon, zoom + DETAIL_ZOOM_DELTA).tileId,
+        centroidlat = place.centroidlat,
+        centroidlon = place.centroidlon,
+        mentioncount = computedfeatures.mentions,
+        avgsentimentnumerator = (computedfeatures.sentiment.neg_avg * DoubleToLongConversionFactor).toLong,
+        insertiontime = new Date().getTime
+      )
+    })
   }
 }
 

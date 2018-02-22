@@ -1,31 +1,32 @@
 package com.microsoft.partnercatalyst.fortis.spark.sinks.cassandra
 
 import com.datastax.spark.connector.cql.{CassandraConnector, Schema}
-import org.apache.spark.rdd.RDD
 import com.datastax.spark.connector.writer._
-import com.datastax.spark.connector._
+import org.apache.spark.rdd.{PairRDDFunctions, RDD}
 
 import scala.reflect.ClassTag
 
 object CassandraExtensions {
-  implicit class CassandraRDD[T](val rdd: RDD[T]) extends AnyVal {
-    def dedupAndSaveToCassandra(keyspaceName: String, tableName: String)
-      (implicit connector: CassandraConnector = CassandraConnector(rdd.sparkContext),
-       rwf: RowWriterFactory[T], vt: ClassTag[T]): Unit = {
+  implicit class CassandraRDD[K, V](val rdd: RDD[(K, V)]) extends AnyVal {
+    def deDupValuesByCassandraTable(keyspaceName: String, tableName: String)
+      (implicit connector: CassandraConnector = CassandraConnector(rdd.sparkContext), rwf: RowWriterFactory[V], kt: ClassTag[K], vt: ClassTag[V], ord: Ordering[K]): RDD[(K, V)] =
+    {
       val tableDef = Schema.tableFromCassandra(connector, keyspaceName, tableName)
-      val rowWriter = implicitly[RowWriterFactory[T]].rowWriter(tableDef, tableDef.primaryKey.map(_.ref))
+      val rowWriter = implicitly[RowWriterFactory[V]].rowWriter(tableDef, tableDef.primaryKey.map(_.ref))
       val primaryKeySize = tableDef.primaryKey.length
 
-      val keyedByPrimaryKey = rdd.keyBy(value => {
-        val buffer = new Array[Any](primaryKeySize)
-        rowWriter.readColumnValues(value, buffer)
+      //import org.apache.spark.rdd.PairRDDFunctions
 
-        buffer.toList
-      })
+      rdd.groupByKey().mapValues(eventRows => {
+        eventRows.groupBy(value => {
+          // Group by an ordered list of primary key column values.
+          // Resulting groups will be rows that would collide. We take 'head' of each group in order to de-dup.
+          val buffer = new Array[Any](primaryKeySize)
+          rowWriter.readColumnValues(value, buffer)
 
-      val deduped = keyedByPrimaryKey.reduceByKey((v1, _) => v1)
-
-      deduped.values.saveToCassandra(keyspaceName, tableName)
+          buffer.toList
+        }).mapValues(_.head).values
+      }).flatMap { case (event, uniqueRows) => uniqueRows.map((event, _)) }
     }
   }
 }

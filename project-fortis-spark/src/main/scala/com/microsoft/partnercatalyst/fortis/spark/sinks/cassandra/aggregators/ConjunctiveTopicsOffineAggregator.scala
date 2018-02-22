@@ -1,5 +1,6 @@
 package com.microsoft.partnercatalyst.fortis.spark.sinks.cassandra.aggregators
 
+import com.datastax.spark.connector._
 import com.datastax.spark.connector.writer.SqlRowWriter
 import com.microsoft.partnercatalyst.fortis.spark.dba.ConfigurationManager
 import com.microsoft.partnercatalyst.fortis.spark.sinks.cassandra.CassandraConjunctiveTopics
@@ -15,7 +16,7 @@ class ConjunctiveTopicsOffineAggregator(configurationManager: ConfigurationManag
       case 0 => return
       case _ =>
         implicit val rowWriter: SqlRowWriter.Factory.type = SqlRowWriter.Factory
-        topics.dedupAndSaveToCassandra(KeyspaceName, Table.ConjunctiveTopics)
+        topics.saveToCassandra(KeyspaceName, Table.ConjunctiveTopics)
     }
 
     topics.unpersist(blocking = true)
@@ -23,15 +24,8 @@ class ConjunctiveTopicsOffineAggregator(configurationManager: ConfigurationManag
 
   private[aggregators] def aggregate(events: RDD[Event]): RDD[ConjunctiveTopic] = {
     val siteSettings = configurationManager.fetchSiteSettings(events.sparkContext)
-    val conjunctiveTopics = events.flatMap(CassandraConjunctiveTopics(_, siteSettings.defaultzoom))
+    val conjunctiveTopicsByEvent = CassandraConjunctiveTopics(events, siteSettings.defaultzoom).keyBy(_.eventid)
 
-    conjunctiveTopics.keyBy(r=>{(
-      r.pipelinekey, r.externalsourceid,
-      r.periodtype, r.perioddate,
-      r.topic, r.conjunctivetopic,
-      r.tileid, r.tilez
-    )}).reduceByKey((a,b)=>{
-      a.copy(mentioncount = a.mentioncount+b.mentioncount)
-    }).values
+    conjunctiveTopicsByEvent.deDupValuesByCassandraTable(KeyspaceName, Table.ConjunctiveTopics).values
   }
 }

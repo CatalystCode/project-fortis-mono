@@ -51,6 +51,7 @@ class ConjunctiveTopicsOffineAggregatorTestSpec extends FlatSpec with BeforeAndA
 
   it should "produce an all/all aggregates for single event" in {
     val period = Period("day-2017-08-11")
+    val eventId = UUID.randomUUID().toString
     val events: RDD[Event] = sc.parallelize(Seq(Event(
       pipelinekey = "Twitter",
       computedfeatures_json = Features.asJson(Features(
@@ -62,7 +63,7 @@ class ConjunctiveTopicsOffineAggregatorTestSpec extends FlatSpec with BeforeAndA
       )),
       eventtime = period.startTime(),
       eventlangcode = "en",
-      eventid = UUID.randomUUID().toString,
+      eventid = eventId,
       sourceeventid = UUID.randomUUID().toString,
       insertiontime = new Date().getTime,
       body = "",
@@ -88,6 +89,7 @@ class ConjunctiveTopicsOffineAggregatorTestSpec extends FlatSpec with BeforeAndA
     val filteredTopics = topics.filter(topic=>topic.pipelinekey == "all" && topic.externalsourceid == "all" && topic.periodtype == "day" && topic.tilez == 8)
     assert(filteredTopics.size == 1)
     assert(filteredTopics.head == ConjunctiveTopic(
+      eventid = eventId,
       conjunctivetopic = "",
       externalsourceid = "all",
       mentioncount = 1,
@@ -102,6 +104,7 @@ class ConjunctiveTopicsOffineAggregatorTestSpec extends FlatSpec with BeforeAndA
 
   it should "produce an all/all aggregates for two events in the same pipeline" in {
     val period = Period("day-2017-08-11")
+    val eventId = UUID.randomUUID().toString
     val events: RDD[Event] = sc.parallelize(Seq(
         Event(
           pipelinekey = "Twitter",
@@ -114,7 +117,7 @@ class ConjunctiveTopicsOffineAggregatorTestSpec extends FlatSpec with BeforeAndA
           )),
           eventtime = period.startTime(),
           eventlangcode = "en",
-          eventid = UUID.randomUUID().toString,
+          eventid = eventId,
           sourceeventid = UUID.randomUUID().toString,
           insertiontime = new Date().getTime,
           body = "",
@@ -163,6 +166,7 @@ class ConjunctiveTopicsOffineAggregatorTestSpec extends FlatSpec with BeforeAndA
     val allSourcesTopics = topics.filter(topic=>topic.pipelinekey != "all" && topic.externalsourceid == "all" && topic.periodtype == "day" && topic.tilez == 8)
     assert(allSourcesTopics.size == 1)
     assert(allSourcesTopics.head == ConjunctiveTopic(
+      eventid = eventId,
       conjunctivetopic = "",
       externalsourceid = "all",
       mentioncount = 2,
@@ -177,6 +181,7 @@ class ConjunctiveTopicsOffineAggregatorTestSpec extends FlatSpec with BeforeAndA
     val allPipelinesTopics = topics.filter(topic=>topic.pipelinekey == "all" && topic.externalsourceid == "all" && topic.periodtype == "day" && topic.tilez == 8)
     assert(allPipelinesTopics.size == 1)
     assert(allPipelinesTopics.head == ConjunctiveTopic(
+      eventid = eventId,
       conjunctivetopic = "",
       externalsourceid = "all",
       mentioncount = 2,
@@ -191,6 +196,9 @@ class ConjunctiveTopicsOffineAggregatorTestSpec extends FlatSpec with BeforeAndA
 
   it should "produce an all/all aggregates for two events in different pipelines" in {
     val period = Period("day-2017-08-11")
+    val eventIdFacebook = UUID.randomUUID().toString
+    val eventIdTwitter = UUID.randomUUID().toString
+
     val events: RDD[Event] = sc.parallelize(Seq(
       Event(
         pipelinekey = "facebook",
@@ -203,7 +211,7 @@ class ConjunctiveTopicsOffineAggregatorTestSpec extends FlatSpec with BeforeAndA
         )),
         eventtime = period.startTime(),
         eventlangcode = "en",
-        eventid = UUID.randomUUID().toString,
+        eventid = eventIdFacebook,
         sourceeventid = UUID.randomUUID().toString,
         insertiontime = new Date().getTime,
         body = "",
@@ -225,7 +233,7 @@ class ConjunctiveTopicsOffineAggregatorTestSpec extends FlatSpec with BeforeAndA
         )),
         eventtime = period.startTime(),
         eventlangcode = "en",
-        eventid = UUID.randomUUID().toString,
+        eventid = eventIdTwitter,
         sourceeventid = UUID.randomUUID().toString,
         insertiontime = new Date().getTime,
         body = "",
@@ -253,6 +261,7 @@ class ConjunctiveTopicsOffineAggregatorTestSpec extends FlatSpec with BeforeAndA
     assert(allSourcesTopics.size == 2)
     assert(allSourcesTopics.toSet == Set(
       ConjunctiveTopic(
+        eventid = eventIdTwitter,
         conjunctivetopic = "",
         externalsourceid = "all",
         mentioncount = 1,
@@ -264,6 +273,7 @@ class ConjunctiveTopicsOffineAggregatorTestSpec extends FlatSpec with BeforeAndA
         topic = "europe"
       ),
       ConjunctiveTopic(
+        eventid = eventIdFacebook,
         conjunctivetopic = "",
         externalsourceid = "all",
         mentioncount = 1,
@@ -275,20 +285,5 @@ class ConjunctiveTopicsOffineAggregatorTestSpec extends FlatSpec with BeforeAndA
         topic = "europe"
       )
     ))
-
-    val allPipelinesTopics = topics.filter(topic=>topic.pipelinekey == "all" && topic.externalsourceid == "all" && topic.periodtype == "day" && topic.tilez == 8)
-    assert(allPipelinesTopics.size == 1)
-    assert(allPipelinesTopics.head == ConjunctiveTopic(
-      conjunctivetopic = "",
-      externalsourceid = "all",
-      mentioncount = 2,
-      perioddate =  period.startTime(),
-      periodtype = "day",
-      pipelinekey = "all",
-      tileid = "8_120_142",
-      tilez = 8,
-      topic = "europe"
-    ))
   }
-
 }
