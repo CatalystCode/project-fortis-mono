@@ -112,3 +112,5 @@ docker-compose up --build -d
 Note that any changes to the React code in project-fortis-interfaces folder will
 be automatically detected and re-loaded so the re-build step above won't be
 necessary for changes to the frontend.
+
+If you're facing any issues, refer to the [Development FAQ](./development-faq.md).
