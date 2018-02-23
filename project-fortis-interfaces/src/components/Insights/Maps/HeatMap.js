@@ -80,8 +80,6 @@ export default class HeatMap extends React.Component {
     const { targetBbox } = this.props;
     const { dashboardIsLoadedFromShareLink } = nextProps;
     if (hasChanged(this.props, nextProps) && dashboardIsLoadedFromShareLink && !this.state.sharedLinkMapRepositions) {
-      const firstBbox = nextProps.bbox.slice(0,2);
-      const secondBbox = nextProps.bbox.slice(2,4);
       this.refs.map.leafletElement.fitBounds([this.getMapBounds(nextProps.bbox)][0]);
       this.setState({sharedLinkMapRepositions: true});
     }
