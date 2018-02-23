@@ -146,14 +146,14 @@ export const AppPage = createReactClass({
     const {
       fromDate, toDate, datetimeSelection, timespanType, dataSource, maintopic,
       bbox, zoomLevel, conjunctivetopics, externalsourceid, selectedplace,
-      category, sharedLink
+      category
     } = dataStore;
     const includeCsv = false;
 
     this.getFlux().actions.DASHBOARD.initializeDashboard(category, () => {
       this.getFlux().actions.DASHBOARD.reloadVisualizationState(
         fromDate, toDate, datetimeSelection, timespanType, dataSource, maintopic,
-        bbox, zoomLevel, conjunctivetopics, externalsourceid, includeCsv, selectedplace, sharedLink, () => {
+        bbox, zoomLevel, conjunctivetopics, externalsourceid, includeCsv, selectedplace, () => {
           this.props.router.push(category ? `/dashboard/${category}` : '/dashboard');
         }, true);
     });

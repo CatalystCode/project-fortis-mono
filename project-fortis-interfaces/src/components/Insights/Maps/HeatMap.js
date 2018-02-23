@@ -25,8 +25,7 @@ export default class HeatMap extends React.Component {
       placeid: "",
       defaultZoom: parseFloat(defaultZoom || 6),
       maxbounds: maxbounds,
-      sharedLinkMapRepositions: false,
-      mapMovedByProps: false
+      sharedLinkMapRepositions: false
     };
   }
 
@@ -79,13 +78,12 @@ export default class HeatMap extends React.Component {
   componentWillReceiveProps(nextProps) {
     const { placeid, defaultZoom } = this.state;
     const { targetBbox } = this.props;
-    const { sharedLink } = nextProps;
-    if (hasChanged(this.props, nextProps) && sharedLink && !this.state.sharedLinkMapRepositions) {
+    const { dashboardIsLoadedFromShareLink } = nextProps;
+    if (hasChanged(this.props, nextProps) && dashboardIsLoadedFromShareLink && !this.state.sharedLinkMapRepositions) {
       const firstBbox = nextProps.bbox.slice(0,2);
       const secondBbox = nextProps.bbox.slice(2,4);
-      this.refs.map.leafletElement.fitBounds([firstBbox, secondBbox]);
+      this.refs.map.leafletElement.fitBounds([this.getMapBounds(nextProps.bbox)][0]);
       this.setState({sharedLinkMapRepositions: true});
-      this.setState({mapMovedByProps: false});
     }
     else if (hasChanged(this.props, nextProps) && nextProps.selectedplace.placeid && placeid !== nextProps.selectedplace.placeid) {
       this.moveMapToNewLocation(nextProps, defaultZoom);
@@ -102,7 +100,7 @@ export default class HeatMap extends React.Component {
   }
 
   getMapBounds(bbox) {
-    return bbox.length && bbox.length === 4 ? [[bbox[1], bbox[0]], [bbox[3], bbox[2]]] : [];
+    return bbox.length && bbox.length === 4 ? [[bbox[0], bbox[1]], [bbox[2], bbox[3]]] : [];
   }
 
   moveMapToBoundingBox(bbox) {
