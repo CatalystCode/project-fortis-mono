@@ -108,7 +108,8 @@ echo "Finished. Now setting up fortis graphql service in kubernetes."
   "${latest_version}" \
   "${cassandra_port}" \
   "${cassandra_username}" \
-  "${cassandra_password}"
+  "${cassandra_password}" \
+  "${k8cassandra_node_count}"
 
 while :; do
   if [ "${endpoint_protection}" == "none" ]; then
@@ -214,7 +215,8 @@ echo "Finished. Now installing Spark helm chart."
   "${latest_version}" \
   "${cassandra_port}" \
   "${cassandra_username}" \
-  "${cassandra_password}"
+  "${cassandra_password}" \
+  "${k8location}"
 
 echo "Finished. Now setting up fortis spark job upgrade script."
 if ! (command -v yaml > /dev/null); then npm install --global yaml-cli; fi

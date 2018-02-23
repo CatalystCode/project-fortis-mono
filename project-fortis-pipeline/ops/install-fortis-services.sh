@@ -33,6 +33,7 @@ readonly latest_version="${30}"
 readonly cassandra_port="${31}"
 readonly cassandra_username="${32}"
 readonly cassandra_password="${33}"
+readonly k8cassandra_node_count="${34}"
 
 # setup
 readonly install_dir="$(mktemp -d /tmp/fortis-services-XXXXXX)"
@@ -40,6 +41,7 @@ readonly deployment_yaml="${install_dir}/kubernetes-deployment.yaml"
 readonly service_yaml="${install_dir}/kubernetes-service.yaml"
 readonly ingress_yaml="${install_dir}/nginx-ingress.yaml"
 readonly ingress_secret_yaml="${install_dir}/nginx-ingress-secret.yaml"
+readonly replication_factor="$((k8cassandra_node_count/2+1))"
 
 # deploy the service to the kubernetes cluster
 cat > "${deployment_yaml}" << EOF
@@ -111,6 +113,8 @@ spec:
           value: ${cogspeechsvctoken}
         - name: COGNITIVE_VISION_SERVICE_TOKEN
           value: ${cogvisionsvctoken}
+        - name: FORTIS_CASSANDRA_REPLICATION_FACTOR
+          value: "${replication_factor}"
         - name: FORTIS_CASSANDRA_SEED_DATA_URL
           value: ${fortis_site_clone_url}
         - name: FORTIS_CASSANDRA_DATA_SCHEMA_URL

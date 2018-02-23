@@ -38,6 +38,7 @@
     "azure-event-hubs": "0.0.8",
     "azure-sb": "^0.10.4",
     "azure-storage": "^1.3.2",
+    "bluebird": "^3.5.1",
     "body-parser": "^1.15.0",
     "cassandra-driver": "^3.2.2",
     "cors": "^2.8.4",
@@ -63,6 +64,7 @@
     "xml2js": "^0.4.17"
   },
   "devDependencies": {
+    "depcheck": "^0.6.8",
     "eslint": "^4.13.1",
     "eslint-plugin-require-path-exists": "^1.1.7"
   },
@@ -70,6 +72,7 @@
     "createsite": "node src/scripts/createsite.js",
     "addusers": "node src/scripts/addusers.js",
     "ingestsetting": "node src/scripts/ingestsetting.js",
+    "depcheck": "depcheck",
     "lint": "eslint --max-warnings=0 src *.js"
   },
   "generator-swaggerize": {
