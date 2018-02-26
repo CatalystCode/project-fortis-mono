@@ -1,7 +1,7 @@
 DROP KEYSPACE IF EXISTS fortis;
 CREATE KEYSPACE fortis WITH replication = {
     'class': 'SimpleStrategy',
-    'replication_factor': 1 // TODO: change to 3 before merging
+    'replication_factor': 3
 };
 
 // *****************************************************************************

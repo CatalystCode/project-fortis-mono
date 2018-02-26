@@ -1,7 +1,7 @@
 DROP KEYSPACE IF EXISTS settings;
 CREATE KEYSPACE settings WITH replication = {
     'class': 'SimpleStrategy',
-    'replication_factor': 1
+    'replication_factor': 3
 };
 
 // *****************************************************************************
