@@ -183,7 +183,7 @@ CREATE TABLE fortis.eventsbypipeline(
     conjunctiontopic3 text,
     tilez int,
     tileid text,
-    externalsourceid text, -- TODO: should this be part of the Primary Key?
+    externalsourceid text,
     eventtime timestamp,
     eventid text,
     placeid text,
