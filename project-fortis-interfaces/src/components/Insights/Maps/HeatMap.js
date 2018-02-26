@@ -18,7 +18,7 @@ export default class HeatMap extends React.Component {
     this.onViewportChanged = this.onViewportChanged.bind(this);
     this.asyncInvokeDashboardRefresh = this.asyncInvokeDashboardRefresh.bind(this);
     this.changeMapBoundsWithTile = this.changeMapBoundsWithTile.bind(this);
-    const maxbounds = targetBbox.length && targetBbox.length === 4 ? this.getMapBounds(targetBbox) : [];
+    const maxbounds = this.getMapBounds(targetBbox);
 
     this.state = {
       bounds: bounds,
@@ -78,13 +78,14 @@ export default class HeatMap extends React.Component {
     const { placeid, defaultZoom } = this.state;
     const { targetBbox } = this.props;
     const { dashboardIsLoadedFromShareLink } = nextProps;
+    const didPropsChange = hasChanged(this.props, nextProps);
     
-    if (hasChanged(this.props, nextProps) && dashboardIsLoadedFromShareLink && !this.state.sharedLinkMapRepositions) {
+    if (didPropsChange && dashboardIsLoadedFromShareLink && !this.state.sharedLinkMapRepositions) {
       this.refs.map.leafletElement.fitBounds(this.getMapBounds(nextProps.bbox));
       this.setState({sharedLinkMapRepositions: true});
-    } else if (hasChanged(this.props, nextProps) && nextProps.selectedplace.placeid && placeid !== nextProps.selectedplace.placeid) {
+    } else if (didPropsChange && nextProps.selectedplace.placeid && placeid !== nextProps.selectedplace.placeid) {
       this.moveMapToNewLocation(nextProps, defaultZoom);
-    } else if (hasChanged(this.props, nextProps) && nextProps.bbox && isEqual(nextProps.bbox, targetBbox)) {
+    } else if (didPropsChange && nextProps.bbox && isEqual(nextProps.bbox, targetBbox)) {
       this.moveMapToBoundingBox(targetBbox);
     }
   }
@@ -110,14 +111,6 @@ export default class HeatMap extends React.Component {
     const bounds = [[latitudeNorth, longitudeWest], [latitudeSouth, longitudeEast]];
 
     this.refs.map.leafletElement.fitBounds(this.getMapBounds(bounds));
-  }
-
-  formatLeafletBounds(bbox) {
-    if (bbox.length === 4) {
-      return this.getMapBounds(bbox);
-    }
-
-    console.error('Bad bbox format');
   }
 
   renderRectangle(bbox) {
