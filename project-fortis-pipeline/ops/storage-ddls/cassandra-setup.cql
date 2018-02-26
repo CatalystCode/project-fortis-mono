@@ -127,12 +127,11 @@ CREATE TABLE fortis.events(
     PRIMARY KEY (eventid)
 );
 
--- topics 2 and 3 are always written as empty string. They're included to keep partition keys the same as related aggregations.
 CREATE TABLE fortis.populartopics(
     pipelinekey text,
     conjunctiontopic1 text,
-    conjunctiontopic2 text,
-    conjunctiontopic3 text,
+    conjunctiontopic2 text, -- always set to ''
+    conjunctiontopic3 text, -- always set to ''
     tilez int,
     tileid text,
     externalsourceid text,
@@ -151,7 +150,7 @@ CREATE TABLE fortis.eventplacesbysource(
     tilez int,
     tileid text,
     externalsourceid text,
-    periodtype text, -- always set to day
+    periodtype text, -- always set to 'day'
     eventtime timestamp,
     eventid text,
     placeid text,
