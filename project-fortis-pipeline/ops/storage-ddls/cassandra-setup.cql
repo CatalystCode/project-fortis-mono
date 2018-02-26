@@ -4,9 +4,9 @@ CREATE KEYSPACE fortis WITH replication = {
     'replication_factor': 3
 };
 
-// *****************************************************************************
-// * Down migration
-// *****************************************************************************
+-- *****************************************************************************
+-- * Down migration
+-- *****************************************************************************
 
 DROP TABLE IF EXISTS fortis.conjunctivetopics;
 DROP TABLE IF EXISTS fortis.computedtiles;
@@ -21,16 +21,16 @@ DROP TABLE IF EXISTS fortis.eventplaces;
 DROP TABLE IF EXISTS fortis.eventsbypipeline;
 
 
-// *****************************************************************************
-// * Data tables
-// *****************************************************************************
+-- *****************************************************************************
+-- * Data tables
+-- *****************************************************************************
 
-// *****************************************************************************
-// * Partition key: (pipelinekey, conjunctiontopic1, conjunctiontopic2, conjunctiontopic3, tilez, tileid, externalsourceid, periodtype)
-// *
-// * Spark partitions TileRow data once according to the above partition key and 
-// * performs writes to these tables without shuffling.
-// *****************************************************************************
+-- *****************************************************************************
+-- * Partition key: (pipelinekey, conjunctiontopic1, conjunctiontopic2, conjunctiontopic3, tilez, tileid, externalsourceid, periodtype)
+-- *
+-- * Spark partitions TileRow data once according to the above partition key and 
+-- * performs writes to these tables without shuffling.
+-- *****************************************************************************
 
 CREATE TABLE fortis.computedtiles (
     pipelinekey text,
@@ -99,7 +99,7 @@ CREATE TABLE fortis.eventplaces(
     conjunctiontopic3 text,
     tilez int,
     tileid text,
-    externalsourceid text, // TODO: should this be part of the Primary Key?
+    externalsourceid text, -- TODO: should this be part of the Primary Key?
     eventtime timestamp,
     eventid text,
     placeid text,
@@ -127,7 +127,7 @@ CREATE TABLE fortis.events(
     PRIMARY KEY (eventid)
 );
 
-// topics 2 and 3 are always written as empty string. They're included to keep partition keys the same as related aggregations.
+-- topics 2 and 3 are always written as empty string. They're included to keep partition keys the same as related aggregations.
 CREATE TABLE fortis.populartopics(
     pipelinekey text,
     conjunctiontopic1 text,
@@ -151,7 +151,7 @@ CREATE TABLE fortis.eventplacesbysource(
     tilez int,
     tileid text,
     externalsourceid text,
-    periodtype text, // always set to day
+    periodtype text, -- always set to day
     eventtime timestamp,
     eventid text,
     placeid text,
@@ -183,7 +183,7 @@ CREATE TABLE fortis.eventsbypipeline(
     conjunctiontopic3 text,
     tilez int,
     tileid text,
-    externalsourceid text, // TODO: should this be part of the Primary Key?
+    externalsourceid text, -- TODO: should this be part of the Primary Key?
     eventtime timestamp,
     eventid text,
     placeid text,
