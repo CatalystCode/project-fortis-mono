@@ -19,15 +19,15 @@ check_preconditions() {
 
 create_image() {
   touch .env-secrets
-  BUILD_TAG="${TRAVIS_TAG}" docker-compose build project_fortis_services
+  BUILD_TAG="${TRAVIS_TAG}" docker-compose build project_fortis_backup
 }
 
 publish_image() {
   docker login --username="${DOCKER_USERNAME}" --password="${DOCKER_PASSWORD}"
-  BUILD_TAG="${TRAVIS_TAG}" docker-compose push project_fortis_services
+  BUILD_TAG="${TRAVIS_TAG}" docker-compose push project_fortis_backup
 }
 
-pushd "$(dirname $0)/../.."
+pushd "$(dirname "$0")/../.."
 
 check_preconditions
 create_image

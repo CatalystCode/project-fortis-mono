@@ -1,6 +1,28 @@
 matrix:
   include:
 
+    - language: bash
+      sudo: required
+      addons:
+        apt:
+          sources:
+            - debian-sid
+          packages:
+            - shellcheck
+            - docker-ce
+      script:
+        - project-fortis-backup/travis/ci.sh
+      services:
+        - docker
+      deploy:
+        - provider: script
+          script: project-fortis-backup/travis/publish.sh
+          on:
+            repo: CatalystCode/project-fortis
+            tags: true
+      env:
+        NAME=project-fortis-backup
+
     - language: node_js
       node_js:
         - "6"
@@ -35,8 +57,18 @@ matrix:
         project-fortis-services/travis/ci.sh
       services:
         - docker
-      after_success:
-        - project-fortis-services/travis/publish.sh
+      addons:
+        apt:
+          sources:
+            - debian-sid
+          packages:
+            - docker-ce
+      deploy:
+        - provider: script
+          script: project-fortis-services/travis/publish.sh
+          on:
+            repo: CatalystCode/project-fortis
+            tags: true
       env:
         NAME=project-fortis-services
 
@@ -47,7 +79,11 @@ matrix:
       sudo: required
       script:
         - project-fortis-spark/travis/ci.sh
-      after_success:
-        - project-fortis-spark/travis/publish.sh
+      deploy:
+        - provider: script
+          script: project-fortis-spark/travis/publish.sh
+          on:
+            repo: CatalystCode/project-fortis
+            tags: true
       env:
         NAME=project-fortis-spark
