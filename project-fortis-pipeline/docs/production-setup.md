@@ -4,8 +4,13 @@
 
 ### Azure subscription
 
-First and foremost, you'll need an Azure subscription. You can create one for
-free [here](https://azure.microsoft.com/en-us/free/).
+First and foremost, you'll need an Azure subscription. 
+
+Azure is a comprehensive set of cloud services that developers and IT professionals use to build, deploy, and manage applications through our global network of datacenters. Integrated tools, DevOps, and a marketplace support you in efficiently building anything from simple mobile apps to internet-scale solutions.
+
+A full list of products and services can be found [here](https://azure.microsoft.com/en-us/services/).
+
+And you can create an account for free [here](https://azure.microsoft.com/en-us/free/).
 
 ### Secure your Fortis site with TLS
 
