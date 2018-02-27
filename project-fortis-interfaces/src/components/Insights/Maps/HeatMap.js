@@ -52,7 +52,7 @@ export default class HeatMap extends React.Component {
   }
 
   asyncInvokeDashboardRefresh(viewport) {
-    if (this.refs.map && !this.state.mapMovedByProps) {
+    if (this.refs.map) {
       const { dataSource, timespanType, termFilters, datetimeSelection, maintopic, externalsourceid,
         fromDate, toDate, selectedplace } = this.props;
       const bbox = this.getLeafletBbox();
