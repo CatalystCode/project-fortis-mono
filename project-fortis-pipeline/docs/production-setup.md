@@ -14,6 +14,8 @@ And you can create an account for free [here](https://azure.microsoft.com/en-us/
 
 ### Secure your Fortis site with TLS
 
+TLS is the successcor to SSL. The TLS protocol aims primarily to provide privacy and data integrity between two communicating computer applications. You can find more information about it [here](https://en.wikipedia.org/wiki/Transport_Layer_Security)
+
 To enable TLS and secure your Fortis site, you have two choices:
 
 1. Provide your own TLS certificate and private key
