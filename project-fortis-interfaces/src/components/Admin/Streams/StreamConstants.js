@@ -6,8 +6,8 @@ const supportedAudioTypes = ['Select type', 'mp3', 'wav'];
 const redditSearchResultTypes = ['Select type', 'Link', 'Comment', 'Account', 'Message', 'Subreddit', 'Award'];
 const speechType = ['Select type', 'interactive', 'dictation', 'conversation'];
 const radioOutputFormat = ['Select format', 'simple', 'detailed'];
-const facebookStreamFactories = ['FacebookComment', 'FacebookPost'];
-const instagramStreamFactories = ['InstagramLocation', 'InstagramTag'];
+const facebookStreamFactories = ['FacebookPost'];
+const instagramStreamFactories = ['InstagramTag'];
 
 const supportedLanguagesMap = {
   'Select Language': {
@@ -276,7 +276,7 @@ const defaultStreamMap = {
     pipelineKey: 'Facebook',
     pipelineLabel: 'Facebook',
     pipelineIcon: 'Facebook Icon',
-    streamFactory: ['FacebookComment'],
+    streamFactory: ['FacebookPost'],
     enabled: true
   },
   HTML: {
@@ -290,7 +290,7 @@ const defaultStreamMap = {
     pipelineKey: 'Instagram',
     pipelineLabel: 'Instagram',
     pipelineIcon: 'Instagram Icon',
-    streamFactory: ['InstagramLocation'],
+    streamFactory: ['InstagramTag'],
     enabled: true
   },
   RSS: {
