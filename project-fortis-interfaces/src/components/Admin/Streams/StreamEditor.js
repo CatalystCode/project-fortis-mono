@@ -24,6 +24,7 @@ class StreamEditor extends React.Component {
   getStreamColumns() {
     const columnValues = [
       {key: "pipelineKey", name: "Type"},
+      {key: "streamFactory", name: "Source Type"},
       {width: 115, key: "status", name: "Status", formatter: <StreamStatusButtonFormatter flux={this.props.flux}/>, getRowMetaData: (row) => row},
       {width: 70, key: "params", name: "Edit", formatter: <StreamParamsButtonFormatter flux={this.props.flux}/>, getRowMetaData: (row) => row}
     ];

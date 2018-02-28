@@ -6,6 +6,8 @@ const supportedAudioTypes = ['Select type', 'mp3', 'wav'];
 const redditSearchResultTypes = ['Select type', 'Link', 'Comment', 'Account', 'Message', 'Subreddit', 'Award'];
 const speechType = ['Select type', 'interactive', 'dictation', 'conversation'];
 const radioOutputFormat = ['Select format', 'simple', 'detailed'];
+const facebookStreamFactories = ['FacebookComment', 'FacebookPost'];
+const instagramStreamFactories = ['InstagramLocation', 'InstagramTag'];
 
 const supportedLanguagesMap = {
   'Select Language': {
@@ -260,77 +262,70 @@ const defaultStreamMap = {
     pipelineKey: 'Bing',
     pipelineLabel: 'Bing',
     pipelineIcon: 'Bing Icon',
-    streamFactory: 'Bing',
+    streamFactory: ['BingPage'],
     enabled: true
   },
-  EventHub: {
-    pipelineKey: 'EventHub',
-    pipelineLabel: 'EventHub',
-    pipelineIcon: 'EventHub Icon',
-    streamFactory: 'EventHub',
+  CustomEvent : {
+    pipelineKey: 'CustomEvent',
+    pipelineLabel: 'Custom Event',
+    pipelineIcon: 'Custom Event Icon',
+    streamFactory: ['CustomEvents'],
     enabled: true
   },
-  FacebookComment: {
-    pipelineKey: 'FacebookComment',
-    pipelineLabel: 'FacebookComment',
-    pipelineIcon: 'Facebook Comment Icon',
-    streamFactory: 'FacebookComment',
-    enabled: true
-  },
-  FacebookPost: {
-    pipelineKey: 'FacebookPost',
-    pipelineLabel: 'FacebookPost',
-    pipelineIcon: 'Facebook Post Icon',
-    streamFactory: 'FacebookPost',
+  Facebook: {
+    pipelineKey: 'Facebook',
+    pipelineLabel: 'Facebook',
+    pipelineIcon: 'Facebook Icon',
+    streamFactory: ['FacebookComment'],
     enabled: true
   },
   HTML: {
     pipelineKey: 'HTML',
     pipelineLabel: 'HTML',
     pipelineIcon: 'HTML Icon',
-    streamFactory: 'HTML',
+    streamFactory: ['HTML'],
     enabled: true
   },
-  InstagramLocation: {
-    pipelineKey: 'InstagramLocation',
-    pipelineLabel: 'InstagramLocation',
-    pipelineIcon: 'Instagram Location Icon',
-    streamFactory: 'InstagramLocation',
-    enabled: true
-  },
-  InstagramTag: {
-    pipelineKey: 'InstagramTag',
-    pipelineLabel: 'InstagramTag',
-    pipelineIcon: 'Instagram Tag Icon',
-    streamFactory: 'InstagramTag',
+  Instagram: {
+    pipelineKey: 'Instagram',
+    pipelineLabel: 'Instagram',
+    pipelineIcon: 'Instagram Icon',
+    streamFactory: ['InstagramLocation'],
     enabled: true
   },
   RSS: {
     pipelineKey: 'RSS',
     pipelineLabel: 'RSS',
     pipelineIcon: 'RSS Icon',
-    streamFactory: 'RSS',
+    streamFactory: ['RSS'],
     enabled: true
   },
   Radio: {
     pipelineKey: 'Radio',
     pipelineLabel: 'Radio',
     pipelineIcon: 'Radio Icon',
-    streamFactory: 'Radio',
+    streamFactory: ['Radio'],
     enabled: true
   },
   Reddit: {
     pipelineKey: 'Reddit',
     pipelineLabel: 'Reddit',
     pipelineIcon: 'Reddit Icon',
-    streamFactory: 'Reddit',
+    streamFactory: ['RedditObject'],
+    enabled: true
+  },
+  TadaWeb: {
+    pipelineKey: 'TadaWeb',
+    pipelineLabel: 'TadaWeb',
+    pipelineIcon: 'TadaWeb Icon',
+    streamFactory: ['Tadaweb'],
     enabled: true
   },
   Twitter: {
     pipelineKey: 'Twitter',
     pipelineLabel: 'Twitter',
     pipelineIcon: 'fa fa-Twitter',
-    streamFactory: 'Twitter',
+    streamFactory: ['Twitter'],
     enabled: true
   }
 };
@@ -368,9 +363,9 @@ const schema = {
           default: defaultStreamMap.Bing.pipelineIcon
         },
         streamFactory: {
+          title: 'Source Type',
           type: 'string',
-          enum: (values(defaultStreamMap).map(defaultStream => defaultStream.streamFactory)),
-          default: defaultStreamMap.Bing.streamFactory
+          enum: ['Select a source type']
         },
         enabled: {
           type: 'boolean',
@@ -380,6 +375,10 @@ const schema = {
           type: 'object'
         }
       },
+      required: [
+        'pipelineKey',
+        'streamFactory'
+      ],
       dependencies: {
         pipelineKey: {
           oneOf: [
@@ -400,7 +399,8 @@ const schema = {
                 },
                 streamFactory: {
                   type: 'string',
-                  default: defaultStreamMap.Bing.streamFactory
+                  enum: defaultStreamMap.Bing.streamFactory,
+                  default: defaultStreamMap.Bing.streamFactory[0]
                 },
                 enabled: {
                   type: 'boolean',
@@ -440,28 +440,30 @@ const schema = {
               properties: {
                 pipelineKey: {
                   enum: [
-                    'EventHub'
+                    'CustomEvent'
                   ]
                 },
                 pipelineLabel: {
                   type: 'string',
-                  default: defaultStreamMap.EventHub.pipelineLabel
+                  default: defaultStreamMap.CustomEvent.pipelineLabel
                 },
                 pipelineIcon: {
                   type: 'string',
-                  default: defaultStreamMap.EventHub.pipelineIcon
+                  default: defaultStreamMap.CustomEvent.pipelineIcon
                 },
                 streamFactory: {
                   type: 'string',
-                  default: defaultStreamMap.EventHub.streamFactory
+                  enum: defaultStreamMap.CustomEvent.streamFactory,
+                  default: defaultStreamMap.CustomEvent.streamFactory[0]
                 },
                 enabled: {
                   type: 'boolean',
-                  default: defaultStreamMap.EventHub.enabled
+                  default: defaultStreamMap.CustomEvent.enabled
                 },
                 params: {
-                  title: 'Event Hub Stream Parameters',
+                  title: 'Custom Event Stream Parameters',
                   type: 'object',
+                  description: 'To fill in the following parameters, create an event hub for custom events',
                   properties: {
                     namespace: {
                       title: 'Namespace',
@@ -508,98 +510,49 @@ const schema = {
               properties: {
                 pipelineKey: {
                   enum: [
-                    'FacebookComment'
+                    'Facebook'
                   ]
                 },
                 pipelineLabel: {
                   type: 'string',
-                  default: defaultStreamMap.FacebookComment.pipelineLabel
+                  default: defaultStreamMap.Facebook.pipelineLabel
                 },
                 pipelineIcon: {
                   type: 'string',
-                  default: defaultStreamMap.FacebookComment.pipelineIcon
+                  default: defaultStreamMap.Facebook.pipelineIcon
                 },
                 streamFactory: {
                   type: 'string',
-                  default: defaultStreamMap.FacebookComment.streamFactory
+                  enum: facebookStreamFactories,
+                  default: defaultStreamMap.Facebook.streamFactory
                 },
                 enabled: {
                   type: 'boolean',
-                  default: defaultStreamMap.FacebookComment.enabled
+                  default: defaultStreamMap.Facebook.enabled
                 },
                 params: {
-                  title: 'Facebook Comment Parameters',
+                  title: 'Facebook Parameters',
                   type: 'object',
                   properties: {
-                    facebookAppId: {
+                    appId: {
                       title: 'Facebook App Id',
                       type: 'string',
                       pattern: '\\d+'
                     },
-                    facebookAppSecret: {
+                    appSecret: {
                       title: 'Facebook App Secret',
                       type: 'string',
                       pattern: '\\w+'
                     },
-                    facebookAuthToken: {
+                    authToken: {
                       title: 'Facebook Auth Token',
                       type: 'string',
                     }
                   },
                   required: [
-                    'facebookAppId',
-                    'facebookAppSecret',
-                    'facebookAuthToken'
-                  ]
-                }
-              },
-            },
-            {
-              properties: {
-                pipelineKey: {
-                  enum: [
-                    'FacebookPost'
-                  ]
-                },
-                pipelineLabel: {
-                  type: 'string',
-                  default: defaultStreamMap.FacebookPost.pipelineLabel
-                },
-                pipelineIcon: {
-                  type: 'string',
-                  default: defaultStreamMap.FacebookPost.pipelineIcon
-                },
-                streamFactory: {
-                  type: 'string',
-                  default: defaultStreamMap.FacebookPost.streamFactory
-                },
-                enabled: {
-                  type: 'boolean',
-                  default: defaultStreamMap.FacebookPost.enabled
-                },
-                params: {
-                  title: 'Facebook Post Parameters',
-                  type: 'object',
-                  properties: {
-                    facebookAppId: {
-                      title: 'Facebook App Id',
-                      type: 'string',
-                      pattern: '\\d+'
-                    },
-                    facebookAppSecret: {
-                      title: 'Facebook App Secret',
-                      type: 'string',
-                      pattern: '\\w+'
-                    },
-                    facebookAuthToken: {
-                      title: 'Facebook Auth Token',
-                      type: 'string',
-                    }
-                  },
-                  required: [
-                    'facebookAppId',
-                    'facebookAppSecret',
-                    'facebookAuthToken'
+                    'appId',
+                    'appSecret',
+                    'authToken'
                   ]
                 }
               },
@@ -621,7 +574,8 @@ const schema = {
                 },
                 streamFactory: {
                   type: 'string',
-                  default: defaultStreamMap.HTML.streamFactory
+                  enum: defaultStreamMap.Facebook.streamFactory,
+                  default: defaultStreamMap.Facebook.streamFactory[0]
                 },
                 enabled: {
                   type: 'boolean',
@@ -654,105 +608,97 @@ const schema = {
               properties: {
                 pipelineKey: {
                   enum: [
-                    'InstagramLocation'
+                    'Instagram'
                   ]
                 },
                 pipelineLabel: {
                   type: 'string',
-                  default: defaultStreamMap.InstagramLocation.pipelineLabel
+                  default: defaultStreamMap.Instagram.pipelineLabel
                 },
                 pipelineIcon: {
                   type: 'string',
-                  default: defaultStreamMap.InstagramLocation.pipelineIcon
+                  default: defaultStreamMap.Instagram.pipelineIcon
                 },
                 streamFactory: {
                   type: 'string',
-                  default: defaultStreamMap.InstagramLocation.streamFactory
+                  enum: instagramStreamFactories,
+                  default: instagramStreamFactories[0]
                 },
                 enabled: {
                   type: 'boolean',
-                  default: defaultStreamMap.InstagramLocation.enabled
+                  default: defaultStreamMap.Instagram.enabled
                 },
                 params: {
-                  title: 'Instagram Location Parameters',
+                  title: 'Instagram Parameters',
                   type: 'object',
                   properties: {
-                    instagramAuthToken: {
+                    authToken: {
                       title: 'Instagram Auth Token',
-                      type: 'string',
-                      pattern: '\\d+'
-                    },
-                    instagramLocation: {
-                      title: 'Instagram Location',
-                      type: 'object',
+                      type: 'string'
+                    }
+                  },
+                  required: [
+                    'authToken'
+                  ]
+                }
+              },
+              dependencies: {
+                streamFactory: {
+                  oneOf: [
+                    {
                       properties: {
-                        lat: {
-                          title: 'Latitude',
-                          type: 'number'
+                        streamFactory: {
+                          enum: [
+                            "InstagramTag"
+                          ]
                         },
-                        long: {
-                          title: 'Longitude',
-                          type: 'number'
+                        params: {
+                          properties: {
+                            tag: {
+                              title: 'Instagram tag',
+                              type:'string'
+                            }
+                          },
+                          required: [
+                            'tag'
+                          ]
                         }
-                      },
-                      required: [
-                        'lat',
-                        'long'
-                      ]
-                    }
-                  },
-                  required: [
-                    'instagramAuthToken'
-                  ]
-                }
-              },
-            },
-            {
-              properties: {
-                pipelineKey: {
-                  enum: [
-                    'InstagramTag'
-                  ]
-                },
-                pipelineLabel: {
-                  type: 'string',
-                  default: defaultStreamMap.InstagramTag.pipelineLabel
-                },
-                pipelineIcon: {
-                  type: 'string',
-                  default: defaultStreamMap.InstagramTag.pipelineIcon
-                },
-                streamFactory: {
-                  type: 'string',
-                  default: defaultStreamMap.InstagramTag.streamFactory
-                },
-                enabled: {
-                  type: 'boolean',
-                  default: defaultStreamMap.InstagramTag.enabled
-                },
-                params: {
-                  title: 'Instagram Tag Parameters',
-                  type: 'object',
-                  properties: {
-                    instagramAuthToken: {
-                      title: 'Instagram Auth Token',
-                      type: 'string',
-                      pattern: '\\d+'
-                    },
-                    instagramTag: {
-                      title: 'Instagram Tags',
-                      type: 'array',
-                      items: {
-                        type: 'string'
                       }
-                    }
-                  },
-                  required: [
-                    'instagramAuthToken',
-                    'instagramTag'
+                    },
+                    {
+                      properties: {
+                        streamFactory: {
+                          enum: [
+                            "InstagramLocation"
+                          ]
+                        },
+                        params: {
+                          properties: {
+                            instagramLocation: {
+                              title: 'Instagram Location',
+                              type: 'object',
+                              properties: {
+                                lat: {
+                                  title: 'Latitude',
+                                  type: 'number'
+                                },
+                                long: {
+                                  title: 'Longitude',
+                                  type: 'number'
+                                }
+                              },
+                              required: [
+                                'lat',
+                                'long'
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    },
                   ]
                 }
-              },
+              }
             },
             {
               properties: {
@@ -771,7 +717,8 @@ const schema = {
                 },
                 streamFactory: {
                   type: 'string',
-                  default: defaultStreamMap.RSS.streamFactory
+                  enum: defaultStreamMap.RSS.streamFactory,
+                  default: defaultStreamMap.RSS.streamFactory[0]
                 },
                 enabled: {
                   type: 'boolean',
@@ -817,7 +764,8 @@ const schema = {
                 },
                 streamFactory: {
                   type: 'string',
-                  default: defaultStreamMap.Radio.streamFactory
+                  enum: defaultStreamMap.Radio.streamFactory,
+                  default: defaultStreamMap.Radio.streamFactory[0]
                 },
                 enabled: {
                   type: 'boolean',
@@ -856,7 +804,7 @@ const schema = {
                         }
                       }
                     },
-                    radioSubscriptionKey: {
+                    subscriptionKey: {
                       title: 'Ocp-Apim-Subscription-Key',
                       type: 'string',
                       pattern: '(\\w|-)+'
@@ -874,7 +822,7 @@ const schema = {
                   },
                   required: [
                     'radioUrl',
-                    'radioSubscriptionKey'
+                    'subscriptionKey'
                   ]
                 }
               },
@@ -896,7 +844,8 @@ const schema = {
                 },
                 streamFactory: {
                   type: 'string',
-                  default: defaultStreamMap.Reddit.streamFactory
+                  enum: defaultStreamMap.Reddit.streamFactory,
+                  default: defaultStreamMap.Reddit.streamFactory[0]
                 },
                 enabled: {
                   type: 'boolean',
@@ -906,11 +855,11 @@ const schema = {
                   title: 'Reddit Stream Parameters',
                   type: 'object',
                   properties: {
-                    redditAppId: {
+                    applicationId: {
                       title: 'Reddit App Id',
                       type: 'string'
                     },
-                    redditAppSecret: {
+                    applicationSecret: {
                       title: 'Reddit App Secret',
                       type: 'string'
                     },
@@ -936,10 +885,80 @@ const schema = {
                     }
                   },
                   required: [
-                    'redditAppId',
-                    'redditAppSecret',
+                    'applicationId',
+                    'applicationSecret',
                     'keywords',
                     'subreddit'
+                  ]
+                }
+              },
+            },
+            {
+              properties: {
+                pipelineKey: {
+                  enum: [
+                    'TadaWeb'
+                  ]
+                },
+                pipelineLabel: {
+                  type: 'string',
+                  default: defaultStreamMap.TadaWeb.pipelineLabel
+                },
+                pipelineIcon: {
+                  type: 'string',
+                  default: defaultStreamMap.TadaWeb.pipelineIcon
+                },
+                streamFactory: {
+                  type: 'string',
+                  enum: defaultStreamMap.TadaWeb.streamFactory,
+                  default: defaultStreamMap.TadaWeb.streamFactory[0]
+                },
+                enabled: {
+                  type: 'boolean',
+                  default: defaultStreamMap.TadaWeb.enabled
+                },
+                params: {
+                  title: 'TadaWeb Stream Parameters',
+                  type: 'object',
+                  description: 'To fill in the following parameters, create an event hub for TadaWeb',
+                  properties: {
+                    namespace: {
+                      title: 'Namespace',
+                      type: 'string',
+                      pattern: '(\\w|-)+'
+                    },
+                    name: {
+                      title: 'Name',
+                      type: 'string',
+                      pattern: '(\\w|-)+'
+                    },
+                    policyName: {
+                      title: 'Policy Name',
+                      type: 'string',
+                      pattern: '(\\w|-)+'
+                    },
+                    policyKey: {
+                      title: 'Policy Key',
+                      type: 'string',
+                      pattern: '(\\w|-)+'
+                    },
+                    partitionCount: {
+                      title: 'Partition Count',
+                      type: 'number'
+                    },
+                    consumerGroup: {
+                      title: 'Consumer Group',
+                      type: 'string',
+                      pattern: '(\\w|-)+'
+                    }
+                  },
+                  required: [
+                    'namespace',
+                    'name',
+                    'policyName',
+                    'policyKey',
+                    'partitionCount',
+                    'consumerGroup'
                   ]
                 }
               },
@@ -961,7 +980,8 @@ const schema = {
                 },
                 streamFactory: {
                   type: 'string',
-                  default: defaultStreamMap.Twitter.streamFactory
+                  enum: defaultStreamMap.Twitter.streamFactory,
+                  default: defaultStreamMap.Twitter.streamFactory[0]
                 },
                 enabled: {
                   type: 'boolean',
@@ -1031,9 +1051,6 @@ const uiSchema = {
     pipelineLabel: {
       "ui:widget": "hidden"
     },
-    streamFactory: {
-      "ui:widget": "hidden"
-    },
     streamId: {
       "ui:widget": "hidden"
     },
@@ -1043,6 +1060,18 @@ const uiSchema = {
         "ui:description": <a href="https://azure.microsoft.com/try/cognitive-services/" target="_blank" rel="noopener noreferrer">Get API Access Token</a>
       },
       accessTokenSecret: {
+        classNames: "settings secret"
+      },
+      appId: {
+        "ui:description": <a href="https://developers.facebook.com/quickstarts/" target="_blank" rel="noopener noreferrer">Create a facebook app id</a> 
+      },
+      appSecret: {
+        "ui:description": <a href="https://developers.facebook.com/quickstarts/" target="_blank" rel="noopener noreferrer">Create a facebook app secret</a> 
+      },
+      applicationId: {
+        "ui:description": <a href="https://www.reddit.com/wiki/api" target="_blank" rel="noopener noreferrer">Sign up here to get a reddit app id</a>
+      },
+      applicationSecret: {
         classNames: "settings secret"
       },
       audioType: {
@@ -1060,18 +1089,6 @@ const uiSchema = {
       consumerSecret: {
         classNames: "settings secret"
       },
-      facebookAppId: {
-        "ui:description": <a href="https://developers.facebook.com/quickstarts/" target="_blank" rel="noopener noreferrer">Create a facebook app id</a> 
-      },
-      facebookAppSecret: {
-        "ui:description": <a href="https://developers.facebook.com/quickstarts/" target="_blank" rel="noopener noreferrer">Create a facebook app secret</a> 
-      },
-      facebookAuthToken: {
-        "ui:description": <a href="https://developers.facebook.com/tools/accesstoken/" target="_blank" rel="noopener noreferrer">Create a facebook auth token</a> 
-      },
-      instagramAuthToken: {
-        "ui:description": <a href="https://www.instagram.com/developer/authentication/" target="_blank" rel="noopener noreferrer">Get an Instagram Auth Token</a>
-      },
       instagramLocation: {
         lat: {
           "ui:placeholder": 42.37
@@ -1083,16 +1100,13 @@ const uiSchema = {
       maxDepth: {
         "ui:placeholder": 1
       },
-      namespace: {
-        "ui:description": <a href="https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-create" target="_blank" rel="noopener noreferrer">Event Hub Namespace</a> 
-      },
       policyKey: {
         classNames: "settings secret"
       },
       pollingPeriod: {
         "ui:placeholder": 3600
       },
-      radioSubscriptionKey: {
+      subscriptionKey: {
         "ui:description": <a href="https://docs.microsoft.com/en-us/azure/cognitive-services/speech/how-to/how-to-authentication?tabs=Powershell#use-a-subscription-key" target="_blank" rel="noopener noreferrer">Get a subscription key</a>
       },
       radioUrl: {
@@ -1100,12 +1114,6 @@ const uiSchema = {
       },
       readTimeout: {
         "ui:placeholder": 9000
-      },
-      redditAppId: {
-        "ui:description": <a href="https://www.reddit.com/wiki/api" target="_blank" rel="noopener noreferrer">Sign up here to get a reddit app id</a>
-      },
-      redditAppSecret: {
-        classNames: "settings secret"
       },
       searchLimit: {
         "ui:description": "The maximum number of items returned from a search",
