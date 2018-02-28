@@ -1,13 +1,12 @@
 import React from 'react';
 import values from 'lodash/values';
 import keysIn from 'lodash/keysIn';
+import { EVENT_SOURCE_ICON_MAP } from '../../../actions/constants';
 
 const supportedAudioTypes = ['Select type', 'mp3', 'wav'];
 const redditSearchResultTypes = ['Select type', 'Link', 'Comment', 'Account', 'Message', 'Subreddit', 'Award'];
 const speechType = ['Select type', 'interactive', 'dictation', 'conversation'];
 const radioOutputFormat = ['Select format', 'simple', 'detailed'];
-const facebookStreamFactories = ['FacebookPost'];
-const instagramStreamFactories = ['InstagramTag'];
 
 const supportedLanguagesMap = {
   'Select Language': {
@@ -261,71 +260,71 @@ const defaultStreamMap = {
   Bing: {
     pipelineKey: 'Bing',
     pipelineLabel: 'Bing',
-    pipelineIcon: 'Bing Icon',
-    streamFactory: ['BingPage'],
+    pipelineIcon: EVENT_SOURCE_ICON_MAP.bing,
+    streamFactory: 'BingPage',
     enabled: true
   },
   CustomEvent : {
     pipelineKey: 'CustomEvent',
     pipelineLabel: 'Custom Event',
-    pipelineIcon: 'Custom Event Icon',
-    streamFactory: ['CustomEvents'],
+    pipelineIcon: EVENT_SOURCE_ICON_MAP.customEvent,
+    streamFactory: 'CustomEvents',
     enabled: true
   },
   Facebook: {
     pipelineKey: 'Facebook',
     pipelineLabel: 'Facebook',
-    pipelineIcon: 'Facebook Icon',
-    streamFactory: ['FacebookPost'],
+    pipelineIcon: EVENT_SOURCE_ICON_MAP.facebook,
+    streamFactory: 'FacebookPost',
     enabled: true
   },
   HTML: {
     pipelineKey: 'HTML',
     pipelineLabel: 'HTML',
-    pipelineIcon: 'HTML Icon',
-    streamFactory: ['HTML'],
+    pipelineIcon: EVENT_SOURCE_ICON_MAP.html,
+    streamFactory: 'HTML',
     enabled: true
   },
   Instagram: {
     pipelineKey: 'Instagram',
     pipelineLabel: 'Instagram',
-    pipelineIcon: 'Instagram Icon',
-    streamFactory: ['InstagramTag'],
+    pipelineIcon: EVENT_SOURCE_ICON_MAP.instagram,
+    streamFactory: 'InstagramTag',
     enabled: true
   },
   RSS: {
     pipelineKey: 'RSS',
     pipelineLabel: 'RSS',
-    pipelineIcon: 'RSS Icon',
-    streamFactory: ['RSS'],
+    pipelineIcon: EVENT_SOURCE_ICON_MAP.rss,
+    streamFactory: 'RSS',
     enabled: true
   },
   Radio: {
     pipelineKey: 'Radio',
     pipelineLabel: 'Radio',
-    pipelineIcon: 'Radio Icon',
-    streamFactory: ['Radio'],
+    pipelineIcon: EVENT_SOURCE_ICON_MAP.radio,
+    streamFactory: 'Radio',
     enabled: true
   },
   Reddit: {
     pipelineKey: 'Reddit',
     pipelineLabel: 'Reddit',
-    pipelineIcon: 'Reddit Icon',
-    streamFactory: ['RedditObject'],
+    pipelineIcon: EVENT_SOURCE_ICON_MAP.reddit,
+    streamFactory: 'RedditObject',
     enabled: true
   },
   TadaWeb: {
     pipelineKey: 'TadaWeb',
     pipelineLabel: 'TadaWeb',
-    pipelineIcon: 'TadaWeb Icon',
-    streamFactory: ['Tadaweb'],
+    pipelineIcon: EVENT_SOURCE_ICON_MAP.tadaweb,
+    streamFactory: 'Tadaweb',
     enabled: true
   },
   Twitter: {
     pipelineKey: 'Twitter',
     pipelineLabel: 'Twitter',
-    pipelineIcon: 'fa fa-Twitter',
-    streamFactory: ['Twitter'],
+    pipelineIcon: EVENT_SOURCE_ICON_MAP.twitter,
+    streamFactory: 'Twitter',
     enabled: true
   }
 };
@@ -365,7 +364,7 @@ const schema = {
         streamFactory: {
           title: 'Source Type',
           type: 'string',
-          enum: ['Select a source type']
+          default: defaultStreamMap.Bing.streamFactory
         },
         enabled: {
           type: 'boolean',
@@ -399,8 +398,7 @@ const schema = {
                 },
                 streamFactory: {
                   type: 'string',
-                  enum: defaultStreamMap.Bing.streamFactory,
-                  default: defaultStreamMap.Bing.streamFactory[0]
+                  default: defaultStreamMap.Bing.streamFactory
                 },
                 enabled: {
                   type: 'boolean',
@@ -453,8 +451,7 @@ const schema = {
                 },
                 streamFactory: {
                   type: 'string',
-                  enum: defaultStreamMap.CustomEvent.streamFactory,
-                  default: defaultStreamMap.CustomEvent.streamFactory[0]
+                  default: defaultStreamMap.CustomEvent.streamFactory
                 },
                 enabled: {
                   type: 'boolean',
@@ -523,7 +520,6 @@ const schema = {
                 },
                 streamFactory: {
                   type: 'string',
-                  enum: facebookStreamFactories,
                   default: defaultStreamMap.Facebook.streamFactory
                 },
                 enabled: {
@@ -574,8 +570,7 @@ const schema = {
                 },
                 streamFactory: {
                   type: 'string',
-                  enum: defaultStreamMap.Facebook.streamFactory,
-                  default: defaultStreamMap.Facebook.streamFactory[0]
+                  default: defaultStreamMap.Facebook.streamFactory
                 },
                 enabled: {
                   type: 'boolean',
@@ -621,8 +616,7 @@ const schema = {
                 },
                 streamFactory: {
                   type: 'string',
-                  enum: instagramStreamFactories,
-                  default: instagramStreamFactories[0]
+                  default: defaultStreamMap.Instagram.streamFactory
                 },
                 enabled: {
                   type: 'boolean',
@@ -635,67 +629,28 @@ const schema = {
                     authToken: {
                       title: 'Instagram Auth Token',
                       type: 'string'
+                    },
+                    tag: {
+                      title: 'Instagram tag',
+                      type:'string'
+                    },
+                    instagramLocation: {
+                      title: 'Instagram Location',
+                      type: 'object',
+                      properties: {
+                        lat: {
+                          title: 'Latitude',
+                          type: 'number'
+                        },
+                        long: {
+                          title: 'Longitude',
+                          type: 'number'
+                        }
+                      }
                     }
                   },
                   required: [
                     'authToken'
-                  ]
-                }
-              },
-              dependencies: {
-                streamFactory: {
-                  oneOf: [
-                    {
-                      properties: {
-                        streamFactory: {
-                          enum: [
-                            "InstagramTag"
-                          ]
-                        },
-                        params: {
-                          properties: {
-                            tag: {
-                              title: 'Instagram tag',
-                              type:'string'
-                            }
-                          },
-                          required: [
-                            'tag'
-                          ]
-                        }
-                      }
-                    },
-                    {
-                      properties: {
-                        streamFactory: {
-                          enum: [
-                            "InstagramLocation"
-                          ]
-                        },
-                        params: {
-                          properties: {
-                            instagramLocation: {
-                              title: 'Instagram Location',
-                              type: 'object',
-                              properties: {
-                                lat: {
-                                  title: 'Latitude',
-                                  type: 'number'
-                                },
-                                long: {
-                                  title: 'Longitude',
-                                  type: 'number'
-                                }
-                              },
-                              required: [
-                                'lat',
-                                'long'
-                              ]
-                            }
-                          }
-                        }
-                      }
-                    },
                   ]
                 }
               }
@@ -717,8 +672,7 @@ const schema = {
                 },
                 streamFactory: {
                   type: 'string',
-                  enum: defaultStreamMap.RSS.streamFactory,
-                  default: defaultStreamMap.RSS.streamFactory[0]
+                  default: defaultStreamMap.RSS.streamFactory
                 },
                 enabled: {
                   type: 'boolean',
@@ -764,8 +718,7 @@ const schema = {
                 },
                 streamFactory: {
                   type: 'string',
-                  enum: defaultStreamMap.Radio.streamFactory,
-                  default: defaultStreamMap.Radio.streamFactory[0]
+                  default: defaultStreamMap.Radio.streamFactory
                 },
                 enabled: {
                   type: 'boolean',
@@ -844,8 +797,7 @@ const schema = {
                 },
                 streamFactory: {
                   type: 'string',
-                  enum: defaultStreamMap.Reddit.streamFactory,
-                  default: defaultStreamMap.Reddit.streamFactory[0]
+                  default: defaultStreamMap.Reddit.streamFactory
                 },
                 enabled: {
                   type: 'boolean',
@@ -910,8 +862,7 @@ const schema = {
                 },
                 streamFactory: {
                   type: 'string',
-                  enum: defaultStreamMap.TadaWeb.streamFactory,
-                  default: defaultStreamMap.TadaWeb.streamFactory[0]
+                  default: defaultStreamMap.TadaWeb.streamFactory
                 },
                 enabled: {
                   type: 'boolean',
@@ -980,8 +931,7 @@ const schema = {
                 },
                 streamFactory: {
                   type: 'string',
-                  enum: defaultStreamMap.Twitter.streamFactory,
-                  default: defaultStreamMap.Twitter.streamFactory[0]
+                  default: defaultStreamMap.Twitter.streamFactory
                 },
                 enabled: {
                   type: 'boolean',
@@ -1052,6 +1002,9 @@ const uiSchema = {
       "ui:widget": "hidden"
     },
     streamId: {
+      "ui:widget": "hidden"
+    },
+    streamFactory: {
       "ui:widget": "hidden"
     },
     params: {
