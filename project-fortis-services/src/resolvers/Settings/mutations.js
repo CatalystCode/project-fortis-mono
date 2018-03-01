@@ -213,7 +213,7 @@ function addTrustedSources(args, res) { // eslint-disable-line no-unused-vars
     });
 
     cassandraConnector.executeBatchMutations(mutations)
-      .then(_ => streamingController.restartPipeline())
+      .then(() => streamingController.restartPipeline())
       .then(_ => { // eslint-disable-line no-unused-vars
         resolve({
           sources: args.input.sources
@@ -239,7 +239,7 @@ function removeTrustedSources(args, res) { // eslint-disable-line no-unused-vars
     }));
 
     cassandraConnector.executeBatchMutations(mutations)
-      .then(_ => streamingController.restartPipeline())
+      .then(() => streamingController.restartPipeline())
       .then(_ => { // eslint-disable-line no-unused-vars
         resolve({
           sources: args.input.sources
@@ -417,7 +417,7 @@ function removeStreams(args, res) { // eslint-disable-line no-unused-vars
     }));
 
     cassandraConnector.executeBatchMutations(mutations)
-      .then(_ => streamingController.restartPipeline())
+      .then(() => streamingController.restartPipeline())
       .then(_ => { // eslint-disable-line no-unused-vars
         resolve({
           streams
