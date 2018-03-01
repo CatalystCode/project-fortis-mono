@@ -12,6 +12,8 @@ A full list of products and services can be found [here](https://azure.microsoft
 
 And you can create an account for free [here](https://azure.microsoft.com/en-us/free/).
 
+For this project we're using these services: [Blob Storage](https://azure.microsoft.com/en-us/services/storage/blobs/), [Cognitive Services](https://azure.microsoft.com/en-us/services/cognitive-services/), [Azure Database for PostgreSQL](https://azure.microsoft.com/en-us/services/postgresql/), [Service Bus](https://azure.microsoft.com/en-us/services/service-bus/) and [Active Directory v2](https://azure.microsoft.com/en-us/services/active-directory/).
+
 ### Secure your Fortis site with TLS
 
 TLS is the successcor to SSL. The TLS protocol aims primarily to provide privacy and data integrity between two communicating computer applications. You can find more information about it [here](https://en.wikipedia.org/wiki/Transport_Layer_Security)

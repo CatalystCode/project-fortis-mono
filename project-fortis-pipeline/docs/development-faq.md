@@ -131,3 +131,10 @@ that pre-populate your Fortis site.
 
 There are several examples of tar.gz files to bootstrap sites in the [seed-data](https://github.com/CatalystCode/project-fortis/tree/master/project-fortis-pipeline/localdeploy/seed-data)
 directory which you can use as a template.
+
+## Common Errors
+
+If you see `An error occurred while loading the page: GraphQL call failed` when trying to load the Dashboard, your `docker-compose up` process is either not done running, or you might need to pull down fresh from your Master branch and rebuild.
+
+## Commonly Used 
+A link to all of the libraries we're using as well as a brief synopsis of what they are for, and links to their documentation can be found [here](./development-library.md). 
