@@ -12,7 +12,7 @@ A full list of products and services can be found [here](https://azure.microsoft
 
 And you can create an account for free [here](https://azure.microsoft.com/en-us/free/).
 
-For this project we're using these services: [Blob Storage](https://azure.microsoft.com/en-us/services/storage/blobs/), [Cognitive Services](https://azure.microsoft.com/en-us/services/cognitive-services/), [Azure Database for PostgreSQL](https://azure.microsoft.com/en-us/services/postgresql/), [Service Bus](https://azure.microsoft.com/en-us/services/service-bus/) and [Active Directory v2](https://azure.microsoft.com/en-us/services/active-directory/).
+For this project we're using these services: [Blob Storage](https://azure.microsoft.com/en-us/services/storage/blobs/), [Cognitive Services](https://azure.microsoft.com/en-us/services/cognitive-services/), [Azure Database for PostgreSQL](https://azure.microsoft.com/en-us/services/postgresql/), [Service Bus](https://azure.microsoft.com/en-us/services/service-bus/), [Active Directory v2](https://azure.microsoft.com/en-us/services/active-directory/), [Container Service](https://azure.microsoft.com/en-us/services/container-service/) and [Event Hubs](https://azure.microsoft.com/en-us/services/event-hubs/).
 
 ### Secure your Fortis site with TLS
 

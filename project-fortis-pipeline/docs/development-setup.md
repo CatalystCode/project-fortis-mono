@@ -116,5 +116,3 @@ be automatically detected and re-loaded so the re-build step above won't be
 necessary for changes to the frontend.
 
 If you're facing any issues, refer to the [Development FAQ](./development-faq.md).
-
-
