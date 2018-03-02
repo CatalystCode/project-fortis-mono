@@ -8,12 +8,9 @@ import com.microsoft.partnercatalyst.fortis.spark.sinks.cassandra.CassandraExten
 import com.microsoft.partnercatalyst.fortis.spark.sinks.cassandra.CassandraExtensionsTests.TestInstance
 
 class CassandraExtensionsTests extends FlatSpec with BeforeAndAfter {
-  private val keyspaceName = "fortis"
-  private val tableName = "test"
-
   private val tableDef = TableDef(
-    keyspaceName = keyspaceName,
-    tableName = tableName,
+    keyspaceName = "fortis",
+    tableName = "test",
     partitionKey = List(
       ColumnDef("a", PartitionKeyColumn, IntType)
     ),
@@ -51,7 +48,7 @@ class CassandraExtensionsTests extends FlatSpec with BeforeAndAfter {
       ("key2", duplicateRow)
     ))
 
-    val deDupedRdd = testRdd.deDupValuesByCassandraTable(keyspaceName, tableName, Some(tableDef))
+    val deDupedRdd = testRdd.deDupValuesByCassandraTable(tableDef)
     val rows = deDupedRdd.collect()
 
     assert(rows.length == 2
@@ -66,7 +63,7 @@ class CassandraExtensionsTests extends FlatSpec with BeforeAndAfter {
       ("key", TestInstance(a = 1, b = "foo", 4.56))
     ))
 
-    val deDupedRdd = testRdd.deDupValuesByCassandraTable(keyspaceName, tableName, Some(tableDef))
+    val deDupedRdd = testRdd.deDupValuesByCassandraTable(tableDef)
     val rows = deDupedRdd.collect()
 
     assert(rows.length == 1)
@@ -76,8 +73,8 @@ class CassandraExtensionsTests extends FlatSpec with BeforeAndAfter {
     val emptyRdd = sc.makeRDD[(String, TestInstance)](Seq.empty)
     val testRdd = sc.makeRDD(Seq(("key", TestInstance(a = 1, b = "foo", c = 1.23))))
 
-    assert(emptyRdd.deDupValuesByCassandraTable(keyspaceName, tableName, Some(tableDef)).collect().isEmpty)
-    assert(testRdd.deDupValuesByCassandraTable(keyspaceName, tableName, Some(tableDef)).collect().length == 1)
+    assert(emptyRdd.deDupValuesByCassandraTable(tableDef).collect().isEmpty)
+    assert(testRdd.deDupValuesByCassandraTable(tableDef).collect().length == 1)
   }
 }
 

@@ -8,10 +8,16 @@ import scala.reflect.ClassTag
 
 object CassandraExtensions {
   implicit class CassandraRDD[K, V](val rdd: RDD[(K, V)]) extends AnyVal {
-    def deDupValuesByCassandraTable(keyspaceName: String, tableName: String, tableDefOpt: Option[TableDef] = None)
+    def deDupValuesByCassandraTable(keyspaceName: String, tableName: String)
       (implicit connector: CassandraConnector = CassandraConnector(rdd.sparkContext), rwf: RowWriterFactory[V], kt: ClassTag[K], vt: ClassTag[V], ord: Ordering[K]): RDD[(K, V)] =
     {
-      val tableDef = tableDefOpt.getOrElse(Schema.tableFromCassandra(connector, keyspaceName, tableName))
+      val tableDef = Schema.tableFromCassandra(connector, keyspaceName, tableName)
+      rdd.deDupValuesByCassandraTable(tableDef)
+    }
+
+    def deDupValuesByCassandraTable(tableDef: TableDef)
+      (implicit rwf: RowWriterFactory[V], kt: ClassTag[K], vt: ClassTag[V], ord: Ordering[K]): RDD[(K, V)] =
+    {
       val rowWriter = implicitly[RowWriterFactory[V]].rowWriter(tableDef, tableDef.primaryKey.map(_.ref))
       val primaryKeySize = tableDef.primaryKey.length
 
