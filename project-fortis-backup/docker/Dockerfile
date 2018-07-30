@@ -10,20 +10,13 @@ RUN apt-get update && \
     wget -qO - ${CASSANDRA_URL} | tar -xzC /opt && \
     ln -s /opt/${CASSANDRA_ARTIFACT} ${CASSANDRA_HOME}
 
-# install azure cli
-#RUN echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ xenial main" | tee /etc/apt/sources.list.d/azure-cli.list && \
-    #apt-key adv --keyserver packages.microsoft.com --recv-keys 52E16F86FEE04B979B07E28DB02C46DF417A0893 && \
-    #apt-get -qq install -y apt-transport-https && \
-    #apt-get update && \
-    #apt-get -qq install -y azure-cli
-
-
-RUN apt-get -qq update && apt-get -qq install -y libssl-dev libffi-dev python-dev 
-RUN echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ wheezy main" | tee /etc/apt/sources.list.d/azure-cli.list 
-RUN apt-get install curl -y
-RUN curl -L https://packages.microsoft.com/keys/microsoft.asc | apt-key add - 
-RUN apt-get -qq install -y apt-transport-https 
-RUN apt-get -qq update && apt-get -qq install -y azure-cli
+RUN apt-get -qq update && \
+    apt-get -qq install -y libssl-dev libffi-dev python-dev curl && \
+    echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ xenial main" | tee /etc/apt/sources.list.d/azure-cli.list && \
+    curl -L https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
+    apt-get -qq install -y apt-transport-https && \
+    apt-get -qq update && \
+    apt-get -qq install -y azure-cli
 
 # install app dependencies
 RUN apt-get -qq install -y cron gzip
